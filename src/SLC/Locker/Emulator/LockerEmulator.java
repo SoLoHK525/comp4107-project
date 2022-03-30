@@ -1,11 +1,11 @@
 package SLC.Locker.Emulator;
 
 import AppKickstarter.misc.Msg;
-import SLC.Locker.LockerDriver;
+import SLC.HWHandler.HWHandler;
 import SLC.SLCStarter;
 
 
-public class LockerEmulator extends LockerDriver {
+public class LockerEmulator extends HWHandler {
     private SLCStarter emulatorStarter;
     private String id;
     private LockerEmulatorPresenter presenter;
@@ -19,6 +19,11 @@ public class LockerEmulator extends LockerDriver {
     public void start() {
         this.presenter = new LockerEmulatorPresenter();
         this.presenter.start();
+    }
+
+    @Override
+    protected void processMsg(Msg msg) {
+
     }
 
     @Override

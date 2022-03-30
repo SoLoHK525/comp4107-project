@@ -9,7 +9,6 @@ public class EmulatorViewController {
     private ChoiceBox PollOptions;
 
     public void initialize() {
-        System.out.println(PollOptions);
         PollOptions.getSelectionModel().selectFirst();
     }
 
