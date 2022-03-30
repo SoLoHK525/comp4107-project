@@ -4,6 +4,7 @@ import AppKickstarter.AppKickstarter;
 import AppKickstarter.misc.Msg;
 import AppKickstarter.timer.Timer;
 
+import SLC.Locker.Emulator.LockerEmulator;
 import SLC.SLC.SLC;
 import SLC.BarcodeReaderDriver.BarcodeReaderDriver;
 import SLC.TouchDisplayHandler.TouchDisplayHandler;
@@ -18,7 +19,7 @@ public class SLCStarter extends AppKickstarter {
     protected SLC slc;
     protected BarcodeReaderDriver barcodeReaderDriver;
     protected TouchDisplayHandler touchDisplayHandler;
-
+	protected LockerEmulator lockerEmulator;
 
     //------------------------------------------------------------
     // main

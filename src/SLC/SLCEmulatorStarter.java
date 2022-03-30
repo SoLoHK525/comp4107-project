@@ -12,6 +12,8 @@ import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.stage.Stage;
 
+import java.util.concurrent.locks.Lock;
+
 
 //======================================================================
 // SLCEmulatorStarter
@@ -73,12 +75,14 @@ public class SLCEmulatorStarter extends SLCStarter {
             slcEmulatorStarter.setSLC(slc);
             slcEmulatorStarter.setBarcodeReaderDriver(barcodeReaderEmulator);
             slcEmulatorStarter.setTouchDisplayHandler(touchDisplayEmulator);
+            slcEmulatorStarter.setLocker(lockerEmulator);
 
             // start threads
             new Thread(timer).start();
             new Thread(slc).start();
             new Thread(barcodeReaderEmulator).start();
             new Thread(touchDisplayEmulator).start();
+            new Thread(lockerEmulator).start();
         } // start
     } // Emulators
 
@@ -99,5 +103,9 @@ public class SLCEmulatorStarter extends SLCStarter {
 
     private void setTouchDisplayHandler(TouchDisplayHandler touchDisplayHandler) {
         this.touchDisplayHandler = touchDisplayHandler;
+    }
+
+    private void setLocker(LockerEmulator lockerEmulator) {
+        this.lockerEmulator = lockerEmulator;
     }
 } // SLCEmulatorStarter

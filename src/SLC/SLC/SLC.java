@@ -11,6 +11,7 @@ public class SLC extends AppThread {
     private int pollingTime;
     private MBox barcodeReaderMBox;
     private MBox touchDisplayMBox;
+	private MBox lockerMBox;
 
     //------------------------------------------------------------
     // SLC
@@ -28,6 +29,7 @@ public class SLC extends AppThread {
 
 	barcodeReaderMBox = appKickstarter.getThread("BarcodeReaderDriver").getMBox();
 	touchDisplayMBox = appKickstarter.getThread("TouchDisplayHandler").getMBox();
+	lockerMBox = appKickstarter.getThread("Locker").getMBox();
 
 	for (boolean quit = false; !quit;) {
 	    Msg msg = mbox.receive();
@@ -45,6 +47,7 @@ public class SLC extends AppThread {
 		    log.info("Poll: " + msg.getDetails());
 		    barcodeReaderMBox.send(new Msg(id, mbox, Msg.Type.Poll, ""));
 		    touchDisplayMBox.send(new Msg(id, mbox, Msg.Type.Poll, ""));
+			lockerMBox.send(new Msg(id, mbox, Msg.Type.Poll, ""));
 		    break;
 
 		case PollAck:
