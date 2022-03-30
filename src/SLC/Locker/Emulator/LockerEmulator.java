@@ -9,6 +9,7 @@ public class LockerEmulator extends HWHandler {
     private SLCStarter emulatorStarter;
     private String id;
     private LockerEmulatorPresenter presenter;
+    private LockerEmulatorModel lockerData;
 
     public LockerEmulator(String id, SLCStarter emulatorStarter) {
         super(id, emulatorStarter);
@@ -17,7 +18,8 @@ public class LockerEmulator extends HWHandler {
     }
 
     public void start() {
-        this.presenter = new LockerEmulatorPresenter();
+        this.lockerData = new LockerEmulatorModel();
+        this.presenter = new LockerEmulatorPresenter(lockerData);
         this.presenter.start();
     }
 
