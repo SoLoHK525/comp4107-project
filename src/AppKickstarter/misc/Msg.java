@@ -158,5 +158,17 @@ public class Msg {
          * Card inserted
          */
         BR_BarcodeRead,
+        /**
+         * Unlock a locker
+         */
+        LK_Unlock,
+        /**
+         *  Check lock status of a locker
+         */
+        LK_CheckStatus,
+        /**
+         *  Return lock status of a locker
+         */
+        LK_ReturnStatus,
     } // Type
 } // Msg

@@ -5,20 +5,20 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 
-import java.awt.*;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Set;
+import java.util.Observable;
+import java.util.Observer;
 
 
-public class LockerEmulatorPresenter {
+public class LockerEmulatorPresenter implements Observer {
 
     private EmulatorViewController viewController;
-    private LockerEmulatorModel lockerData;
+    private LockerEmulatorModel lockerModel;
 
 
-    public LockerEmulatorPresenter(LockerEmulatorModel lockerData) {
-        this.lockerData = lockerData;
+    public LockerEmulatorPresenter(LockerEmulatorModel lockerModel) {
+        this.lockerModel = lockerModel;
     }
 
     public void start() {
@@ -32,14 +32,15 @@ public class LockerEmulatorPresenter {
             Parent root = loader.load();
             viewController = loader.getController();
             viewController.initialize();
+            viewController.addObserver(this);
             primaryStage.setTitle("Locker Preview");
             primaryStage.setScene(new Scene(root, 600, 400));
             primaryStage.setResizable(false);
             primaryStage.show();
 
             //  Insert and render locker data
-            ArrayList<String> ids = this.lockerData.GetAllLockerID();
-            for(int i = 0; i < ids.size(); i++) {
+            ArrayList<String> ids = this.lockerModel.GetAllLockerID();
+            for (int i = 0; i < ids.size(); i++) {
                 viewController.addToGrid(ids.get(i), i);
             }
         } catch (IOException io) {
@@ -49,5 +50,19 @@ public class LockerEmulatorPresenter {
 
     public String getPoll() {
         return viewController.getPoll();
+    }
+
+    public String getLockStatus(String id) {
+        return this.lockerModel.GetLockStatusByID(id) ? "Locked" : "Unlocked";
+    }
+
+    public void lockingOperation(String id, boolean isLock) {
+        this.lockerModel.UpdateStatusByID(id, isLock);
+        this.viewController.SetLocker(id, isLock);
+    }
+
+    @Override
+    public void update(Observable o, Object arg) {
+        this.lockingOperation((String) arg, true);
     }
 }

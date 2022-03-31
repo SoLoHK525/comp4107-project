@@ -4,6 +4,8 @@ import AppKickstarter.AppKickstarter;
 import AppKickstarter.misc.*;
 import AppKickstarter.timer.Timer;
 
+import java.util.concurrent.ThreadLocalRandom;
+
 
 //======================================================================
 // SLC
@@ -11,67 +13,73 @@ public class SLC extends AppThread {
     private int pollingTime;
     private MBox barcodeReaderMBox;
     private MBox touchDisplayMBox;
-	private MBox lockerMBox;
+    private MBox lockerMBox;
 
     //------------------------------------------------------------
     // SLC
     public SLC(String id, AppKickstarter appKickstarter) throws Exception {
-	super(id, appKickstarter);
-	pollingTime = Integer.parseInt(appKickstarter.getProperty("SLC.PollingTime"));
+        super(id, appKickstarter);
+        pollingTime = Integer.parseInt(appKickstarter.getProperty("SLC.PollingTime"));
     } // SLC
 
 
     //------------------------------------------------------------
     // run
     public void run() {
-	Timer.setTimer(id, mbox, pollingTime);
-	log.info(id + ": starting...");
+        Timer.setTimer(id, mbox, pollingTime);
+        log.info(id + ": starting...");
 
-	barcodeReaderMBox = appKickstarter.getThread("BarcodeReaderDriver").getMBox();
-	touchDisplayMBox = appKickstarter.getThread("TouchDisplayHandler").getMBox();
-	lockerMBox = appKickstarter.getThread("Locker").getMBox();
+        barcodeReaderMBox = appKickstarter.getThread("BarcodeReaderDriver").getMBox();
+        touchDisplayMBox = appKickstarter.getThread("TouchDisplayHandler").getMBox();
+        lockerMBox = appKickstarter.getThread("Locker").getMBox();
 
-	for (boolean quit = false; !quit;) {
-	    Msg msg = mbox.receive();
+        for (boolean quit = false; !quit; ) {
+            Msg msg = mbox.receive();
 
-	    log.fine(id + ": message received: [" + msg + "].");
+            log.fine(id + ": message received: [" + msg + "].");
 
-	    switch (msg.getType()) {
-		case TD_MouseClicked:
-		    log.info("MouseCLicked: " + msg.getDetails());
-		    processMouseClicked(msg);
-		    break;
+            switch (msg.getType()) {
+                case TD_MouseClicked:
+                    log.info("MouseCLicked: " + msg.getDetails());
+                    processMouseClicked(msg);
+                    break;
 
-		case TimesUp:
-		    Timer.setTimer(id, mbox, pollingTime);
-		    log.info("Poll: " + msg.getDetails());
-		    barcodeReaderMBox.send(new Msg(id, mbox, Msg.Type.Poll, ""));
-		    touchDisplayMBox.send(new Msg(id, mbox, Msg.Type.Poll, ""));
-			lockerMBox.send(new Msg(id, mbox, Msg.Type.Poll, ""));
-		    break;
+                case LK_ReturnStatus:
+                    log.info("LK_Status: " + msg.getDetails());
+                    break;
 
-		case PollAck:
-		    log.info("PollAck: " + msg.getDetails());
-		    break;
+                case TimesUp:
+                    Timer.setTimer(id, mbox, pollingTime);
+                    log.info("Poll: " + msg.getDetails());
+                    barcodeReaderMBox.send(new Msg(id, mbox, Msg.Type.Poll, ""));
+                    touchDisplayMBox.send(new Msg(id, mbox, Msg.Type.Poll, ""));
+                    lockerMBox.send(new Msg(id, mbox, Msg.Type.Poll, ""));
 
-		case Terminate:
-		    quit = true;
-		    break;
+                    //For testing purpose
+                    //lockerMBox.send(new Msg(id, mbox, Msg.Type.LK_Unlock, String.format("%04d", ThreadLocalRandom.current().nextInt(0, 16))));
+                    break;
 
-		default:
-		    log.warning(id + ": unknown message type: [" + msg + "]");
-	    }
-	}
+                case PollAck:
+                    log.info("PollAck: " + msg.getDetails());
+                    break;
 
-	// declaring our departure
-	appKickstarter.unregThread(this);
-	log.info(id + ": terminating...");
+                case Terminate:
+                    quit = true;
+                    break;
+                default:
+                    log.warning(id + ": unknown message type: [" + msg + "]");
+            }
+        }
+
+        // declaring our departure
+        appKickstarter.unregThread(this);
+        log.info(id + ": terminating...");
     } // run
 
 
     //------------------------------------------------------------
     // processMouseClicked
     private void processMouseClicked(Msg msg) {
-	// *** process mouse click here!!! ***
+        // *** process mouse click here!!! ***
     } // processMouseClicked
 } // SLC
