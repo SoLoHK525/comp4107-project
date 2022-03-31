@@ -87,8 +87,12 @@ public class OctopusCardReaderEmulatorController {
                 break;
 
             case "Octopus here":
-                octopusCardReaderMBox.send(new Msg(id, octopusCardReaderMBox, Msg.Type.OCR_CardRead, cardNumField.getText()));
-                cardReaderTextArea.appendText("Charging card " + cardNumField.getText()+"\n");
+                if(cardReaderStatusField.getText().equals("Active")) {
+                    octopusCardReaderMBox.send(new Msg(id, octopusCardReaderMBox, Msg.Type.OCR_CardRead, cardNumField.getText()));
+                    cardReaderTextArea.appendText("Charging card " + cardNumField.getText()+"\n");
+                }else if(cardReaderStatusField.getText().equals("Standby")) {
+                    cardReaderTextArea.appendText("Card Reader is not activated yet... "+"\n");
+                }
                 break;
 
             case "Activate/Standby":

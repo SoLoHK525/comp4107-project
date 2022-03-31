@@ -170,5 +170,6 @@ public class Msg {
          * Octopus Card inserted
          */
         OCR_CardRead,
+
     } // Type
 } // Msg

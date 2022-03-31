@@ -54,7 +54,7 @@ public class OctopusCardReaderEmulator extends OctopusCardReaderDriver {
                 break;
 
             case "Standby":
-                slc.send(new Msg(id, mbox, Msg.Type.OCR_GoStandby, "Octopus Card Reader Standby!"));
+                slc.send(new Msg(id, mbox, Msg.Type.OCR_GoActive, "Octopus Card Reader Standby!"));
                 octopusCardReaderEmulatorController.goStandby();
                 break;
 
@@ -68,7 +68,7 @@ public class OctopusCardReaderEmulator extends OctopusCardReaderDriver {
     protected void handleGoStandby() {
         switch (octopusCardReaderEmulatorController.getStandbyResp()) {
             case "Activated":
-                slc.send(new Msg(id, mbox, Msg.Type.OCR_GoActive, "Octopus Card Reader Activated!"));
+                slc.send(new Msg(id, mbox, Msg.Type.OCR_GoStandby, "Octopus Card Reader Activated!"));
                 octopusCardReaderEmulatorController.goActive();
                 break;
 

@@ -55,7 +55,7 @@ public class SLC extends AppThread {
                     break;
 
                 case OCR_CardRead:
-                    log.info("Charging Card Number: " + msg.getDetails());
+                    log.info("Charging Card Number " + msg.getDetails() + "successfully");
                     break;
 
                 case OCR_GoActive:
