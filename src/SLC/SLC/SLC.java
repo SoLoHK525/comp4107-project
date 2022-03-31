@@ -73,6 +73,10 @@ public class SLC extends AppThread {
                     barcodeReaderMBox.send(new Msg(id, mbox, Msg.Type.BR_GoStandby, ""));
                     break;
 
+                case BR_BarcodeRead:
+                    log.info("[" + msg.getSender() + "(Received Barcode): " + msg.getDetails() + "]");
+                    break;
+
                 default:
                     log.warning(id + ": unknown message type: [" + msg + "]");
             }
