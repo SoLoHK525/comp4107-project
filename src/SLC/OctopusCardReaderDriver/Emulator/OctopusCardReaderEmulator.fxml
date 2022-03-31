@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import java.lang.*?>
+<?import javafx.collections.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.*?>
@@ -12,14 +14,14 @@
                <font>
                   <Font name="System Bold" size="20.0" />
                </font></Label>
-            <TextField alignment="CENTER_RIGHT" editable="false" layoutX="122.0" layoutY="4.0" prefHeight="59.0" prefWidth="339.0" />
+            <TextField fx:id="amountField" alignment="CENTER_RIGHT" editable="false" layoutX="122.0" layoutY="4.0" prefHeight="59.0" prefWidth="339.0" />
          </children></AnchorPane>
       <AnchorPane layoutX="14.0" layoutY="96.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="104.0" prefWidth="234.0">
          <children>
-            <Button layoutX="7.0" layoutY="62.0" mnemonicParsing="false" prefHeight="39.0" prefWidth="104.0" text="Octopus Card 3" />
-            <Button layoutX="126.0" layoutY="12.0" mnemonicParsing="false" prefHeight="39.0" prefWidth="104.0" text="Octopus Card 2" />
-            <Button layoutX="7.0" layoutY="12.0" mnemonicParsing="false" prefHeight="39.0" prefWidth="104.0" text="Octopus Card 1" />
-            <Button layoutX="126.0" layoutY="62.0" mnemonicParsing="false" prefHeight="39.0" prefWidth="104.0" text="Reset" />
+            <Button layoutX="7.0" layoutY="62.0" mnemonicParsing="false" onAction="#buttonPressed" prefHeight="39.0" prefWidth="104.0" text="Octopus Card 3" />
+            <Button layoutX="126.0" layoutY="12.0" mnemonicParsing="false" onAction="#buttonPressed" prefHeight="39.0" prefWidth="104.0" text="Octopus Card 2" />
+            <Button layoutX="7.0" layoutY="12.0" mnemonicParsing="false" onAction="#buttonPressed" prefHeight="39.0" prefWidth="104.0" text="Octopus Card 1" />
+            <Button layoutX="126.0" layoutY="62.0" mnemonicParsing="false" onAction="#buttonPressed" prefHeight="39.0" prefWidth="104.0" text="Reset" />
          </children></AnchorPane>
       <AnchorPane layoutX="14.0" layoutY="200.0" prefHeight="86.0" prefWidth="224.0">
          <children>
@@ -28,10 +30,10 @@
                   <Font name="System Bold Italic" size="13.0" />
                </font>
             </Label>
-            <TextField layoutX="10.0" layoutY="39.0" prefHeight="39.0" prefWidth="224.0" />
+            <TextField fx:id="cardNumField" layoutX="10.0" layoutY="39.0" prefHeight="39.0" prefWidth="224.0" />
          </children></AnchorPane>
-      <Button layoutX="260.0" layoutY="106.0" mnemonicParsing="false" prefHeight="172.0" prefWidth="224.0" text=" Octopus here" textAlignment="CENTER" textFill="#8a3232" />
-      <TextArea layoutX="20.0" layoutY="300.0" prefHeight="180.0" prefWidth="464.0" />
+      <Button layoutX="260.0" layoutY="106.0" mnemonicParsing="false" onAction="#buttonPressed" prefHeight="172.0" prefWidth="224.0" text="Octopus here" textFill="#8a3232" />
+      <TextArea fx:id="cardReaderTextArea" editable="false" layoutX="20.0" layoutY="300.0" prefHeight="180.0" prefWidth="464.0" />
       <GridPane layoutX="46.0" layoutY="486.0" prefHeight="154.0" prefWidth="428.0">
         <columnConstraints>
           <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
@@ -45,13 +47,37 @@
         </rowConstraints>
          <children>
             <Label text="Octopus Reader Status:" />
-            <TextField prefHeight="29.0" prefWidth="170.0" GridPane.columnIndex="1" />
+            <TextField fx:id="cardReaderStatusField" editable="false" prefHeight="29.0" prefWidth="170.0" GridPane.columnIndex="1" />
             <Label text="Activation Response:" GridPane.rowIndex="1" />
-            <ChoiceBox prefHeight="29.0" prefWidth="150.0" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+            <ChoiceBox fx:id="pollRespCBox" prefHeight="29.0" prefWidth="150.0" value="ACK" GridPane.columnIndex="1" GridPane.rowIndex="3">
+             <items>
+                 <FXCollections fx:factory="observableArrayList">
+                     <String fx:value="ACK" />
+                     <String fx:value="NAK" />
+                     <String fx:value="Ignore" />
+                 </FXCollections>
+             </items>
+            </ChoiceBox>
             <Label text="Standby Response:" GridPane.rowIndex="2" />
-            <ChoiceBox prefHeight="32.0" prefWidth="150.0" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+            <ChoiceBox fx:id="standbyRespCBox" prefHeight="32.0" prefWidth="150.0" value="Standby" GridPane.columnIndex="1" GridPane.rowIndex="2">
+             <items>
+                 <FXCollections fx:factory="observableArrayList">
+                     <String fx:value="Activated" />
+                     <String fx:value="Standby" />
+                     <String fx:value="Ignore" />
+                 </FXCollections>
+             </items>
+            </ChoiceBox>
             <Label text="Poll Response:" GridPane.rowIndex="3" />
-            <ChoiceBox prefHeight="31.0" prefWidth="150.0" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+            <ChoiceBox fx:id="activationRespCBox" prefHeight="31.0" prefWidth="150.0" value="Activated" GridPane.columnIndex="1" GridPane.rowIndex="1">
+             <items>
+                 <FXCollections fx:factory="observableArrayList">
+                     <String fx:value="Activated" />
+                     <String fx:value="Standby" />
+                     <String fx:value="Ignore" />
+                 </FXCollections>
+             </items>
+            </ChoiceBox>
          </children>
       </GridPane>
    </children>

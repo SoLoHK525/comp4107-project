@@ -158,5 +158,17 @@ public class Msg {
          * Card inserted
          */
         BR_BarcodeRead,
+        /**
+         * Octopus Card Reader Go Activate
+         */
+        OCR_GoActive,
+        /**
+         * Octopus Card Reader Go Standby
+         */
+        OCR_GoStandby,
+        /**
+         * Octopus Card inserted
+         */
+        OCR_CardRead,
     } // Type
 } // Msg
