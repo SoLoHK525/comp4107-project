@@ -26,25 +26,25 @@ public class TouchDisplayEmulator extends TouchDisplayHandler {
     //------------------------------------------------------------
     // TouchDisplayEmulator
     public TouchDisplayEmulator(String id, SLCStarter slcStarter) throws Exception {
-	super(id, slcStarter);
-	this.slcStarter = slcStarter;
-	this.id = id;
+        super(id, slcStarter);
+        this.slcStarter = slcStarter;
+        this.id = id;
     } // TouchDisplayEmulator
 
 
     //------------------------------------------------------------
     // start
     public void start() throws Exception {
-	// Parent root;
-	myStage = new Stage();
-	reloadStage("TouchDisplayEmulator.fxml");
-	myStage.setTitle("Touch Display");
-	myStage.setResizable(false);
-	myStage.setOnCloseRequest((WindowEvent event) -> {
-	    slcStarter.stopApp();
-	    Platform.exit();
-	});
-	myStage.show();
+        // Parent root;
+        myStage = new Stage();
+        reloadStage("TouchDisplayEmulator.fxml");
+        myStage.setTitle("Touch Display");
+        myStage.setResizable(false);
+        myStage.setOnCloseRequest((WindowEvent event) -> {
+            slcStarter.stopApp();
+            Platform.exit();
+        });
+        myStage.show();
     } // TouchDisplayEmulator
 
 
@@ -54,31 +54,40 @@ public class TouchDisplayEmulator extends TouchDisplayHandler {
         TouchDisplayEmulator touchDisplayEmulator = this;
 
         Platform.runLater(new Runnable() {
-	    @Override
-	    public void run() {
-		try {
-		    log.info(id + ": loading fxml: " + fxmlFName);
+            @Override
+            public void run() {
+                try {
+                    log.info(id + ": loading fxml: " + fxmlFName);
 
-		    // get the latest pollResp string, default to "ACK"
-		    String pollResp = "ACK";
-		    if (touchDisplayEmulatorController != null) {
-		        pollResp = touchDisplayEmulatorController.getPollResp();
+                    // get the latest pollResp string, default to "ACK"
+                    String pollResp = "ACK";
+                    if (touchDisplayEmulatorController != null) {
+                        pollResp = touchDisplayEmulatorController.getPollResp();
                     }
 
-		    Parent root;
-		    FXMLLoader loader = new FXMLLoader();
-		    loader.setLocation(TouchDisplayEmulator.class.getResource(fxmlFName));
-		    root = loader.load();
-		    touchDisplayEmulatorController = (TouchDisplayEmulatorController) loader.getController();
-		    touchDisplayEmulatorController.initialize(id, slcStarter, log, touchDisplayEmulator, pollResp);
-		    myStage.setScene(new Scene(root, WIDTH, HEIGHT));
-		} catch (Exception e) {
-		    log.severe(id + ": failed to load " + fxmlFName);
-		    e.printStackTrace();
-		}
-	    }
-	});
+                    Parent root;
+                    FXMLLoader loader = new FXMLLoader();
+                    loader.setLocation(TouchDisplayEmulator.class.getResource(fxmlFName));
+                    root = loader.load();
+                    touchDisplayEmulatorController = (TouchDisplayEmulatorController) loader.getController();
+                    touchDisplayEmulatorController.initialize(id, slcStarter, log, touchDisplayEmulator, pollResp);
+                    myStage.setScene(new Scene(root, WIDTH, HEIGHT));
+                } catch (Exception e) {
+                    log.severe(id + ": failed to load " + fxmlFName);
+                    e.printStackTrace();
+                }
+            }
+        });
     } // reloadStage
+
+    protected void changeTextLabel(Msg msg) {
+        String details = msg.getDetails();
+        int index = details.indexOf(' ');
+        String id = details.substring(0, index);
+        String label = details.substring(index + 1);
+
+        touchDisplayEmulatorController.changeTextLabel(id, label);
+    }
 
 
     //------------------------------------------------------------

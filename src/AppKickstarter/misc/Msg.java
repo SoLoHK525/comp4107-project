@@ -147,6 +147,10 @@ public class Msg {
          */
         TD_MouseClicked,
         /**
+         * Change Text Label
+         */
+        TD_ChangeTextLabel,
+        /**
          * Barcode Reader Go Activate
          */
         BR_GoActive,

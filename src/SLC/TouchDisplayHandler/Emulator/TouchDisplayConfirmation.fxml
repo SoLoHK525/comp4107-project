@@ -1,23 +1,38 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.layout.AnchorPane?>
-<?import javafx.scene.shape.Rectangle?>
-
-<?import javafx.scene.shape.Line?>
-<?import javafx.scene.layout.GridPane?>
-<?import javafx.scene.layout.ColumnConstraints?>
-<?import javafx.scene.layout.RowConstraints?>
-<?import javafx.scene.control.Label?>
-<?import javafx.scene.control.ChoiceBox?>
-<?import javafx.collections.FXCollections?>
 <?import java.lang.String?>
-<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="520.0" prefWidth="680.0" xmlns="http://javafx.com/javafx/8.0" xmlns:fx="http://javafx.com/fxml/1" fx:controller="SLC.TouchDisplayHandler.Emulator.TouchDisplayEmulatorController">
+<?import javafx.collections.FXCollections?>
+<?import javafx.scene.Group?>
+<?import javafx.scene.control.ChoiceBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.shape.Line?>
+<?import javafx.scene.shape.Rectangle?>
+<?import javafx.scene.text.Text?>
+
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="520.0" prefWidth="680.0" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="SLC.TouchDisplayHandler.Emulator.ScreenController.TouchScreenConfirmationController">
     <children>
         <AnchorPane prefHeight="480.0" prefWidth="640.0" AnchorPane.leftAnchor="20" AnchorPane.topAnchor="20">
             <children>
-                <Rectangle arcHeight="5.0" arcWidth="5.0" AnchorPane.bottomAnchor="50" AnchorPane.leftAnchor="100" fill="white" height="40.0" stroke="BLACK" strokeType="OUTSIDE" width="160.0" />
-                <Rectangle arcHeight="5.0" arcWidth="5.0" AnchorPane.bottomAnchor="50" AnchorPane.rightAnchor="100" fill="white" height="40.0" stroke="BLACK" strokeType="OUTSIDE" width="160.0" />
-                <Rectangle arcHeight="5.0" arcWidth="5.0" fill="TRANSPARENT" height="480.0" onMouseClicked="#td_mouseClick" stroke="BLACK" strokeType="OUTSIDE" width="640" AnchorPane.bottomAnchor="0" AnchorPane.leftAnchor="0" AnchorPane.topAnchor="0" />
+                <Group layoutX="385.0" layoutY="391.0">
+                    <children>
+                        <Rectangle arcHeight="5.0" arcWidth="5.0" fill="white" height="40.0" stroke="BLACK" strokeType="OUTSIDE" width="160.0" />
+                        <Text fx:id="rightButtonLabel" layoutX="46.0" layoutY="20.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Right Button" textAlignment="CENTER" textOrigin="CENTER" />
+                    </children>
+                </Group>
+                <Rectangle arcHeight="5.0" arcWidth="5.0" fill="white" height="40.0" stroke="BLACK" strokeType="OUTSIDE" width="160.0" AnchorPane.bottomAnchor="50" AnchorPane.leftAnchor="100" />
+                <Group layoutX="101.0" layoutY="391.0">
+                    <children>
+                        <Rectangle arcHeight="5.0" arcWidth="5.0" fill="white" height="40.0" stroke="BLACK" strokeType="OUTSIDE" width="160.0" />
+                        <Text fx:id="leftButtonLabel" layoutX="50.0" layoutY="20.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Left Button" textAlignment="CENTER" textOrigin="CENTER" />
+                    </children>
+                </Group>
+                <Text fx:id="title" layoutX="309.0" layoutY="148.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Title" textAlignment="CENTER" textOrigin="CENTER" />
+                <Text fx:id="subtitle" layoutX="300.0" layoutY="241.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Subtitle" textAlignment="CENTER" textOrigin="CENTER" />
+                <Rectangle arcHeight="5.0" arcWidth="5.0" fill="TRANSPARENT" height="480.0" onMouseClicked="#td_mouseClick" stroke="BLACK" strokeType="OUTSIDE" width="640" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="0.0" />
             </children>
         </AnchorPane>
         <Rectangle arcHeight="5.0" arcWidth="5.0" fill="#d7d7d7" height="50.0" stroke="TRANSPARENT" strokeType="INSIDE" width="680.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" />
@@ -57,4 +72,3 @@
         </GridPane>
     </children>
 </AnchorPane>
-

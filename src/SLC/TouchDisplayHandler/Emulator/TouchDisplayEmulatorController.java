@@ -7,6 +7,7 @@ import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.text.Text;
 
 import java.util.logging.Logger;
 
@@ -29,12 +30,12 @@ public class TouchDisplayEmulatorController {
     // initialize
     public void initialize(String id, AppKickstarter appKickstarter, Logger log, TouchDisplayEmulator touchDisplayEmulator, String pollRespParam) {
         this.id = id;
-	this.appKickstarter = appKickstarter;
-	this.log = log;
-	this.touchDisplayEmulator = touchDisplayEmulator;
-	this.touchDisplayMBox = appKickstarter.getThread("TouchDisplayHandler").getMBox();
-	this.pollResp = pollRespParam;
-	this.pollRespCBox.setValue(this.pollResp);
+        this.appKickstarter = appKickstarter;
+        this.log = log;
+        this.touchDisplayEmulator = touchDisplayEmulator;
+        this.touchDisplayMBox = appKickstarter.getThread("TouchDisplayHandler").getMBox();
+        this.pollResp = pollRespParam;
+        this.pollRespCBox.setValue(this.pollResp);
         this.pollRespCBox.getSelectionModel().selectedIndexProperty().addListener(new ChangeListener<Number>() {
             @Override
             public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
@@ -77,14 +78,17 @@ public class TouchDisplayEmulatorController {
         return pollResp;
     } // getPollResp
 
+    public void changeTextLabel(String id, String label) {
+
+    }
 
     //------------------------------------------------------------
     // td_mouseClick
     public void td_mouseClick(MouseEvent mouseEvent) {
         int x = (int) mouseEvent.getX();
-	int y = (int) mouseEvent.getY();
+        int y = (int) mouseEvent.getY();
 
-	log.fine(id + ": mouse clicked: -- (" + x + ", " + y + ")");
-	touchDisplayMBox.send(new Msg(id, touchDisplayMBox, Msg.Type.TD_MouseClicked, x + " " + y));
+        log.fine(id + ": mouse clicked: -- (" + x + ", " + y + ")");
+        touchDisplayMBox.send(new Msg(id, touchDisplayMBox, Msg.Type.TD_MouseClicked, x + " " + y));
     } // td_mouseClick
 } // TouchDisplayEmulatorController
