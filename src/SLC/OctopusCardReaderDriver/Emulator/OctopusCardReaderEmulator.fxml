@@ -14,7 +14,10 @@
                <font>
                   <Font name="System Bold" size="20.0" />
                </font></Label>
-            <TextField fx:id="amountField" alignment="CENTER_RIGHT" editable="false" layoutX="122.0" layoutY="4.0" prefHeight="59.0" prefWidth="339.0" />
+            <TextField fx:id="amountField" alignment="CENTER_RIGHT" editable="false" layoutX="122.0" layoutY="4.0" prefHeight="59.0" prefWidth="339.0">
+               <font>
+                  <Font size="35.0" />
+               </font></TextField>
          </children></AnchorPane>
       <AnchorPane layoutX="14.0" layoutY="96.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="104.0" prefWidth="234.0">
          <children>

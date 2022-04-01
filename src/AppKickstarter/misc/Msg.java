@@ -170,6 +170,10 @@ public class Msg {
          * Octopus Card inserted
          */
         OCR_CardRead,
+        /**
+         * Octopus Card is charged
+         */
+        OCR_Charged,
 
     } // Type
 } // Msg

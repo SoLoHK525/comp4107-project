@@ -87,17 +87,16 @@ public class OctopusCardReaderEmulatorController {
                 break;
 
             case "Octopus here":
-                if(cardReaderStatusField.getText().equals("Active")) {
+                if(cardReaderStatusField.getText().equals("Active") && !amountField.getText().equals("")) {
                     octopusCardReaderMBox.send(new Msg(id, octopusCardReaderMBox, Msg.Type.OCR_CardRead, cardNumField.getText()));
-                    cardReaderTextArea.appendText("Charging card " + cardNumField.getText()+"\n");
-                }else if(cardReaderStatusField.getText().equals("Standby")) {
+                    cardReaderTextArea.appendText("Charging card " + cardNumField.getText()+ "..."+"\n");
+                }
+                else if(cardReaderStatusField.getText().equals("Active") && amountField.getText().equals("")) {
+                    cardReaderTextArea.appendText("No charge yet..."+"\n");
+                }
+                else if(cardReaderStatusField.getText().equals("Standby")) {
                     cardReaderTextArea.appendText("Card Reader is not activated yet... "+"\n");
                 }
-                break;
-
-            case "Activate/Standby":
-                octopusCardReaderMBox.send(new Msg(id, octopusCardReaderMBox, Msg.Type.OCR_GoActive, cardNumField.getText()));
-                cardReaderTextArea.appendText("Removing card\n");
                 break;
 
             default:
@@ -126,6 +125,10 @@ public class OctopusCardReaderEmulatorController {
 
     public void appendTextArea(String status) {
         cardReaderTextArea.appendText(status+"\n");
+    }
+
+    public void setAmountField(String amount) {
+        amountField.setText("$" + amount);
     }
 
 

@@ -31,6 +31,7 @@ public class SLC extends AppThread {
         touchDisplayMBox = appKickstarter.getThread("TouchDisplayHandler").getMBox();
         octopusCardReaderMBox = appKickstarter.getThread("OctopusCardReaderDriver").getMBox();
 
+
         for (boolean quit = false; !quit; ) {
             Msg msg = mbox.receive();
 
@@ -55,15 +56,16 @@ public class SLC extends AppThread {
                     break;
 
                 case OCR_CardRead:
-                    log.info("Charging Card Number " + msg.getDetails() + "successfully");
+                    log.info("Octopus Card " + msg.getDetails() + " is charged");
+                    octopusCardReaderMBox.send(new Msg(id, mbox, Msg.Type.OCR_Charged, ""));
                     break;
 
                 case OCR_GoActive:
-                    log.info("GoActive Response: " + msg.getDetails());
+                    log.info("[Octopus Card Reader] GoActive Response: " + msg.getDetails());
                     break;
 
                 case OCR_GoStandby:
-                    log.info("GoStandby Response: " + msg.getDetails());
+                    log.info("[Octopus Card Reader] GoStandby Response: " + msg.getDetails());
                     break;
 
                 case Terminate:

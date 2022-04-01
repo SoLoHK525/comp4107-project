@@ -18,10 +18,15 @@ public class OctopusCardReaderDriver extends HWHandler {
                 break;
 
             case OCR_GoActive:
-                handleGoActive();
+                handleGoActive(msg.getDetails());
                 break;
 
             case OCR_GoStandby:
+                handleGoStandby();
+                break;
+
+            case OCR_Charged:
+                handleCharged();
                 handleGoStandby();
                 break;
 
@@ -30,12 +35,16 @@ public class OctopusCardReaderDriver extends HWHandler {
         }
     }
 
-    protected void handleGoActive() {
+    protected void handleGoActive(String amount) {
         log.info(id + ": Go Active");
     }
 
     protected void handleGoStandby() {
         log.info(id + ": Go Standby");
+    }
+
+    protected void handleCharged() {
+        log.info(id + ": charged an Octopus Card");
     }
 
     @Override

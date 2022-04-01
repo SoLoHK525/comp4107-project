@@ -82,6 +82,8 @@ public class SLCEmulatorStarter extends SLCStarter {
             new Thread(barcodeReaderEmulator).start();
             new Thread(touchDisplayEmulator).start();
             new Thread(octopusCardReaderEmulator).start();
+
+
         } // start
     } // Emulators
 

@@ -46,7 +46,7 @@ public class OctopusCardReaderEmulator extends OctopusCardReaderDriver {
     }
 
 
-    protected void handleGoActive() {
+    protected void handleGoActive(String amount) {
         switch (octopusCardReaderEmulatorController.getActivationResp()) {
             case "Activated":
                 slc.send(new Msg(id, mbox, Msg.Type.OCR_GoActive, "Octopus Card Reader Activated!"));
@@ -62,6 +62,7 @@ public class OctopusCardReaderEmulator extends OctopusCardReaderDriver {
                 break;
         }
         octopusCardReaderEmulatorController.appendTextArea("Octopus Card Reader Activated");
+        octopusCardReaderEmulatorController.setAmountField(amount);
     }
 
 
@@ -81,6 +82,13 @@ public class OctopusCardReaderEmulator extends OctopusCardReaderDriver {
                 break;
         }
         octopusCardReaderEmulatorController.appendTextArea("Octopus Card Reader Standby");
+    }
+
+    protected void handleCharged() {
+        octopusCardReaderEmulatorController.appendTextArea("Octopus Card has been charged " + octopusCardReaderEmulatorController.amountField.getText());
+        octopusCardReaderEmulatorController.appendTextArea("------------------------------------------");
+        octopusCardReaderEmulatorController.amountField.setText("");
+        octopusCardReaderEmulatorController.cardNumField.setText("");
     }
 
 
