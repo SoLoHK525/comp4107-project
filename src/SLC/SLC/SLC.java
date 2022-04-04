@@ -84,9 +84,6 @@ public class SLC extends AppThread {
 
                 case Terminate:
                     quit = true;
-                
-                case Terminate:
-                    quit = true;
                     break;
                 
                 case BR_GoActive:

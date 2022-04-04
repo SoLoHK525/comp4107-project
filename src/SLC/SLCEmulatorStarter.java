@@ -114,6 +114,7 @@ public class SLCEmulatorStarter extends SLCStarter {
 
     private void setOctopusCardReaderDriver(OctopusCardReaderDriver octopusCardReaderDriver) {
         this.octopusCardReaderDriver = octopusCardReaderDriver;
+    }
 
     private void setLocker(LockerEmulator lockerEmulator) {
         this.lockerEmulator = lockerEmulator;
