@@ -4,6 +4,8 @@ import AppKickstarter.AppKickstarter;
 import AppKickstarter.misc.*;
 import AppKickstarter.timer.Timer;
 
+import java.util.concurrent.ThreadLocalRandom;
+
 
 //======================================================================
 // SLC
@@ -11,6 +13,7 @@ public class SLC extends AppThread {
     private int pollingTime;
     private MBox barcodeReaderMBox;
     private MBox touchDisplayMBox;
+    private MBox lockerMBox;
 
     //------------------------------------------------------------
     // SLC
@@ -28,6 +31,7 @@ public class SLC extends AppThread {
 
         barcodeReaderMBox = appKickstarter.getThread("BarcodeReaderDriver").getMBox();
         touchDisplayMBox = appKickstarter.getThread("TouchDisplayHandler").getMBox();
+        lockerMBox = appKickstarter.getThread("Locker").getMBox();
 
         for (boolean quit = false; !quit; ) {
             Msg msg = mbox.receive();
@@ -40,11 +44,20 @@ public class SLC extends AppThread {
                     processMouseClicked(msg);
                     break;
 
+                case LK_ReturnStatus:
+                    log.info("LK_Status: " + msg.getDetails());
+                    break;
+               
                 case TimesUp:
                     Timer.setTimer(id, mbox, pollingTime);
                     log.info("Poll: " + msg.getDetails());
                     barcodeReaderMBox.send(new Msg(id, mbox, Msg.Type.Poll, ""));
                     touchDisplayMBox.send(new Msg(id, mbox, Msg.Type.Poll, ""));
+
+                    lockerMBox.send(new Msg(id, mbox, Msg.Type.Poll, ""));
+
+                    //For testing purpose
+                    //lockerMBox.send(new Msg(id, mbox, Msg.Type.LK_Unlock, String.format("%04d", ThreadLocalRandom.current().nextInt(0, 16))));
                     break;
 
                 case PollAck:
@@ -54,7 +67,7 @@ public class SLC extends AppThread {
                 case Terminate:
                     quit = true;
                     break;
-
+                
                 case BR_GoActive:
                     if (msg.getSender().equals("BarcodeReaderDriver")){
                         log.info("Activation Response: " + msg.getDetails());
