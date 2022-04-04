@@ -3,6 +3,9 @@ package SLC.SLC;
 import AppKickstarter.AppKickstarter;
 import AppKickstarter.misc.*;
 import AppKickstarter.timer.Timer;
+import SLC.SLC.Handlers.MouseClick.MainMenuMouseClickHandler;
+import SLC.SLC.Handlers.MouseClick.MouseClickHandler;
+import SLC.SLC.Handlers.MouseClick.TouchScreenConfirmationMouseClickHandler;
 
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -122,6 +125,24 @@ public class SLC extends AppThread {
     //------------------------------------------------------------
     // processMouseClicked
     private void processMouseClicked(Msg msg) {
-        // *** process mouse click here!!! ***
+		String[] pos = msg.getDetails().trim().split("\\s+");
+		int x = Integer.parseInt(pos[0]);
+		int y = Integer.parseInt(pos[1]);
+
+		// Use different handler according which screen is being displayed
+		MouseClickHandler handler = new MainMenuMouseClickHandler();
+
+		handler.listenButtonClick(0, () -> {
+			System.out.println("oh shit i clicked the left");
+			touchDisplayMBox.send(new Msg(id, mbox, Msg.Type.TD_ChangeTextLabel, "title This is the changed title"));
+		});
+
+		handler.listenButtonClick(1, () -> {
+			System.out.println("oh shit i clicked the right");
+			touchDisplayMBox.send(new Msg(id, mbox, Msg.Type.TD_UpdateDisplay, "MainMenu"));
+		});
+
+		System.out.println("Button: " + handler.getClickedButtonIndex(x, y));
+		handler.handleButtonClick(x, y);
     } // processMouseClicked
 } // SLC

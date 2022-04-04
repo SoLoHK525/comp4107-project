@@ -4,7 +4,6 @@ import SLC.HWHandler.HWHandler;
 import AppKickstarter.AppKickstarter;
 import AppKickstarter.misc.*;
 
-
 //======================================================================
 // TouchDisplayHandler
 public class TouchDisplayHandler extends HWHandler {
@@ -14,7 +13,6 @@ public class TouchDisplayHandler extends HWHandler {
         super(id, appKickstarter);
     } // TouchDisplayHandler
 
-
     //------------------------------------------------------------
     // processMsg
     protected void processMsg(Msg msg) {
@@ -22,23 +20,26 @@ public class TouchDisplayHandler extends HWHandler {
             case TD_MouseClicked:
                 slc.send(new Msg(id, mbox, Msg.Type.TD_MouseClicked, msg.getDetails()));
                 break;
-
             case TD_UpdateDisplay:
                 handleUpdateDisplay(msg);
                 break;
-
+            case TD_ChangeTextLabel:
+                changeTextLabel(msg);
+                break;
             default:
                 log.warning(id + ": unknown message type: [" + msg + "]");
         }
     } // processMsg
 
+    protected void changeTextLabel(Msg msg) {
+        log.info(id + ": change text label -- " + msg.getDetails());
+    }
 
     //------------------------------------------------------------
     // handleUpdateDisplay
     protected void handleUpdateDisplay(Msg msg) {
         log.info(id + ": update display -- " + msg.getDetails());
     } // handleUpdateDisplay
-
 
     //------------------------------------------------------------
     // handlePoll
