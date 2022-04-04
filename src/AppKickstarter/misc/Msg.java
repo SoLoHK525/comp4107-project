@@ -162,5 +162,33 @@ public class Msg {
          * Card inserted
          */
         BR_BarcodeRead,
+        /**
+         * Octopus Card Reader Go Activate
+         */
+        OCR_GoActive,
+        /**
+         * Octopus Card Reader Go Standby
+         */
+        OCR_GoStandby,
+        /**
+         * Octopus Card inserted
+         */
+        OCR_CardRead,
+        /**
+         * Octopus Card is charged
+         */
+        OCR_Charged,
+        /*
+         * Unlock a locker
+         */
+        LK_Unlock,
+        /**
+         *  Check lock status of a locker
+         */
+        LK_CheckStatus,
+        /**
+         *  Return lock status of a locker
+         */
+        LK_ReturnStatus,
     } // Type
 } // Msg
