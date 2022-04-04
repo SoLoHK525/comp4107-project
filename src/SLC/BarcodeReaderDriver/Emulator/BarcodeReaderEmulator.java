@@ -24,50 +24,72 @@ public class BarcodeReaderEmulator extends BarcodeReaderDriver {
     //------------------------------------------------------------
     // BarcodeReaderEmulator
     public BarcodeReaderEmulator(String id, SLCStarter slcStarter) {
-	super(id, slcStarter);
-	this.slcStarter = slcStarter;
-	this.id = id;
+        super(id, slcStarter);
+        this.slcStarter = slcStarter;
+        this.id = id;
     } // BarcodeReaderEmulator
 
 
     //------------------------------------------------------------
     // start
     public void start() throws Exception {
-	Parent root;
-	myStage = new Stage();
-	FXMLLoader loader = new FXMLLoader();
-	String fxmlName = "BarcodeReaderEmulator.fxml";
-	loader.setLocation(BarcodeReaderEmulator.class.getResource(fxmlName));
-	root = loader.load();
-	barcodeReaderEmulatorController = (BarcodeReaderEmulatorController) loader.getController();
-	barcodeReaderEmulatorController.initialize(id, slcStarter, log, this);
-	myStage.initStyle(StageStyle.DECORATED);
-	myStage.setScene(new Scene(root, 350, 470));
-	myStage.setTitle("Barcode Reader");
-	myStage.setResizable(false);
-	myStage.setOnCloseRequest((WindowEvent event) -> {
-	    slcStarter.stopApp();
-	    Platform.exit();
-	});
-	myStage.show();
+        Parent root;
+        myStage = new Stage();
+        FXMLLoader loader = new FXMLLoader();
+        String fxmlName = "BarcodeReaderEmulator.fxml";
+        loader.setLocation(BarcodeReaderEmulator.class.getResource(fxmlName));
+        root = loader.load();
+        barcodeReaderEmulatorController = (BarcodeReaderEmulatorController) loader.getController();
+        barcodeReaderEmulatorController.initialize(id, slcStarter, log, this);
+        myStage.initStyle(StageStyle.DECORATED);
+        myStage.setScene(new Scene(root, 350, 470));
+        myStage.setTitle("Barcode Reader");
+        myStage.setResizable(false);
+        myStage.setOnCloseRequest((WindowEvent event) -> {
+            slcStarter.stopApp();
+            Platform.exit();
+        });
+        myStage.show();
     } // BarcodeReaderEmulator
 
 
     //------------------------------------------------------------
     // handleGoActive
     protected void handleGoActive() {
-        // fixme
-	super.handleGoActive();
-	barcodeReaderEmulatorController.appendTextArea("Barcode Reader Activated");
+        switch (barcodeReaderEmulatorController.getActivationResp()){
+            case "Activated":
+                slc.send(new Msg(id, mbox, Msg.Type.BR_GoActive, "Barcode Reader Activated"));
+                barcodeReaderEmulatorController.goActive();
+                break;
+            case "Standby":
+                slc.send(new Msg(id, mbox, Msg.Type.BR_GoActive, "Barcode Reader Standby"));
+                barcodeReaderEmulatorController.goStandby();
+                break;
+            case "Ignore":
+                break;
+        }
+        //super.handleGoActive();
+        barcodeReaderEmulatorController.appendTextArea("Barcode Reader Activated");
     } // handleGoActive
 
 
     //------------------------------------------------------------
     // handleGoStandby
     protected void handleGoStandby() {
-        // fixme
-	super.handleGoStandby();
-	barcodeReaderEmulatorController.appendTextArea("Barcode Reader Standby");
+        switch (barcodeReaderEmulatorController.getStandbyResp()){
+            case "Activated":
+                slc.send(new Msg(id, mbox, Msg.Type.BR_GoStandby, "Barcode Reader Activated"));
+                barcodeReaderEmulatorController.goActive();
+                break;
+            case "Standby":
+                slc.send(new Msg(id, mbox, Msg.Type.BR_GoStandby, "Barcode Reader Standby"));
+                barcodeReaderEmulatorController.goStandby();
+                break;
+            case "Ignore":
+                break;
+        }
+        //super.handleGoStandby();
+        barcodeReaderEmulatorController.appendTextArea("Barcode Reader Standby");
     } // handleGoStandby
 
 
@@ -75,7 +97,6 @@ public class BarcodeReaderEmulator extends BarcodeReaderDriver {
     // handlePoll
     protected void handlePoll() {
         // super.handlePoll();
-
         switch (barcodeReaderEmulatorController.getPollResp()) {
             case "ACK":
                 slc.send(new Msg(id, mbox, Msg.Type.PollAck, id + " is up!"));

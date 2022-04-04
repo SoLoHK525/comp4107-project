@@ -47,12 +47,13 @@ public class SLC extends AppThread {
                 case LK_ReturnStatus:
                     log.info("LK_Status: " + msg.getDetails());
                     break;
-
+               
                 case TimesUp:
                     Timer.setTimer(id, mbox, pollingTime);
                     log.info("Poll: " + msg.getDetails());
                     barcodeReaderMBox.send(new Msg(id, mbox, Msg.Type.Poll, ""));
                     touchDisplayMBox.send(new Msg(id, mbox, Msg.Type.Poll, ""));
+
                     lockerMBox.send(new Msg(id, mbox, Msg.Type.Poll, ""));
 
                     //For testing purpose
@@ -66,6 +67,29 @@ public class SLC extends AppThread {
                 case Terminate:
                     quit = true;
                     break;
+                
+                case BR_GoActive:
+                    if (msg.getSender().equals("BarcodeReaderDriver")){
+                        log.info("Activation Response: " + msg.getDetails());
+                        break;
+                    }
+                    log.info("Activate: " + msg.getDetails());
+                    barcodeReaderMBox.send(new Msg(id, mbox, Msg.Type.BR_GoActive, ""));
+                    break;
+
+                case BR_GoStandby:
+                    if (msg.getSender().equals("BarcodeReaderDriver")){
+                        log.info("Standby Response: " + msg.getDetails());
+                        break;
+                    }
+                    log.info("Standby: " + msg.getDetails());
+                    barcodeReaderMBox.send(new Msg(id, mbox, Msg.Type.BR_GoStandby, ""));
+                    break;
+
+                case BR_BarcodeRead:
+                    log.info("[" + msg.getSender() + "(Received Barcode): " + msg.getDetails() + "]");
+                    break;
+
                 default:
                     log.warning(id + ": unknown message type: [" + msg + "]");
             }
