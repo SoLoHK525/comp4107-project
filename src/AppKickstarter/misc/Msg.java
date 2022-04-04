@@ -174,6 +174,17 @@ public class Msg {
          * Octopus Card is charged
          */
         OCR_Charged,
-
+        /*
+         * Unlock a locker
+         */
+        LK_Unlock,
+        /**
+         *  Check lock status of a locker
+         */
+        LK_CheckStatus,
+        /**
+         *  Return lock status of a locker
+         */
+        LK_ReturnStatus,
     } // Type
 } // Msg
