@@ -25,3 +25,6 @@ out/
 /target/
 etc/
 .idea/
+
+# Project Level Ignores
+*.bin
