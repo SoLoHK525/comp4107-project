@@ -13,6 +13,7 @@ public class SLC extends AppThread {
     private int pollingTime;
     private MBox barcodeReaderMBox;
     private MBox touchDisplayMBox;
+    private MBox octopusCardReaderMBox;
     private MBox lockerMBox;
 
     //------------------------------------------------------------
@@ -31,6 +32,7 @@ public class SLC extends AppThread {
 
         barcodeReaderMBox = appKickstarter.getThread("BarcodeReaderDriver").getMBox();
         touchDisplayMBox = appKickstarter.getThread("TouchDisplayHandler").getMBox();
+        octopusCardReaderMBox = appKickstarter.getThread("OctopusCardReaderDriver").getMBox();
         lockerMBox = appKickstarter.getThread("Locker").getMBox();
 
         for (boolean quit = false; !quit; ) {
@@ -47,13 +49,13 @@ public class SLC extends AppThread {
                 case LK_ReturnStatus:
                     log.info("LK_Status: " + msg.getDetails());
                     break;
-               
+
                 case TimesUp:
                     Timer.setTimer(id, mbox, pollingTime);
                     log.info("Poll: " + msg.getDetails());
                     barcodeReaderMBox.send(new Msg(id, mbox, Msg.Type.Poll, ""));
                     touchDisplayMBox.send(new Msg(id, mbox, Msg.Type.Poll, ""));
-
+                    octopusCardReaderMBox.send(new Msg(id, mbox, Msg.Type.Poll, ""));
                     lockerMBox.send(new Msg(id, mbox, Msg.Type.Poll, ""));
 
                     //For testing purpose
@@ -64,6 +66,22 @@ public class SLC extends AppThread {
                     log.info("PollAck: " + msg.getDetails());
                     break;
 
+                case OCR_CardRead:
+                    log.info("Octopus Card " + msg.getDetails() + " is charged");
+                    octopusCardReaderMBox.send(new Msg(id, mbox, Msg.Type.OCR_Charged, ""));
+                    break;
+
+                case OCR_GoActive:
+                    log.info("[Octopus Card Reader] GoActive Response: " + msg.getDetails());
+                    break;
+
+                case OCR_GoStandby:
+                    log.info("[Octopus Card Reader] GoStandby Response: " + msg.getDetails());
+                    break;
+
+                case Terminate:
+                    quit = true;
+                
                 case Terminate:
                     quit = true;
                     break;
