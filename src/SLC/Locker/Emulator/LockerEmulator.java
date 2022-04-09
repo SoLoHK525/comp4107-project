@@ -17,7 +17,7 @@ public class LockerEmulator extends HWHandler {
 
     public void start() {
         this.lockerModel = new LockerEmulatorModel();
-        this.presenter = new LockerEmulatorPresenter(lockerModel);
+        this.presenter = new LockerEmulatorPresenter(this, lockerModel);
         this.presenter.start();
     }
 
@@ -27,8 +27,8 @@ public class LockerEmulator extends HWHandler {
             case LK_Unlock:
                 this.presenter.lockingOperation(msg.getDetails(), false);
             case LK_CheckStatus:
-                String status = this.presenter.getLockStatus(msg.getDetails());
-                slc.send(new Msg(id, mbox, Msg.Type.LK_ReturnStatus, "Locker ("+ msg.getDetails() + ") is now " + status + "!"));
+                boolean status = this.presenter.getLockStatus(msg.getDetails());
+                slc.send(new Msg(id, mbox, Msg.Type.LK_ReturnStatus, "" + status));
                 break;
         }
     }
@@ -48,5 +48,9 @@ public class LockerEmulator extends HWHandler {
                 // Just ignore.  do nothing!!
                 break;
         }
+    }
+
+    public void emitLocked(String slotID) {
+        slc.send(new Msg(id, mbox, Msg.Type.LK_Locked, slotID));
     }
 }

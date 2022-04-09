@@ -187,9 +187,13 @@ public class Msg {
          */
         LK_CheckStatus,
         /**
-         *  Return lock status of a locker
+         *  Return lock status of a locker with given slotID
          */
         LK_ReturnStatus,
+        /**
+         *  Return locked event to slc once locker is closed
+         */
+        LK_Locked,
         /**
          * Reserve request [Server]
          */
