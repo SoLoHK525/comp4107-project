@@ -93,6 +93,11 @@ public class BarcodeReaderEmulatorController {
                 break;
 
             case "Send Barcode":
+                if (barcodeReaderStatusField.getText().equals("Standby") || barcodeReaderStatusField.getText().equals("Active")){
+                    barcodeReaderTextArea.appendText("Barcode Reader status: " + barcodeReaderStatusField.getText() + "\n");
+                    barcodeReaderTextArea.appendText("Not Available for Reading Barcode." + "\n");
+                    break;
+            }
                 barcodeReaderMBox.send(new Msg(id, barcodeReaderMBox, Msg.Type.BR_BarcodeRead, barcodeNumField.getText()));
                 barcodeReaderTextArea.appendText("Sending barcode " + barcodeNumField.getText() + "\n");
                 break;
