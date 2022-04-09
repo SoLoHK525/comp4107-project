@@ -190,5 +190,37 @@ public class Msg {
          *  Return lock status of a locker
          */
         LK_ReturnStatus,
+        /**
+         * Reserve request [Server]
+         */
+        SVR_ReserveRequest,
+        /**
+         * Reserved response [SLC]
+         */
+        SVR_ReservedResponse,
+        /**
+         * Verify barcode during checkin [SLC]
+         */
+        SVR_VerifyBarcode,
+        /**
+         * Barcode verified message [Server]
+         */
+        SVR_BarcodeVerified,
+        /**
+         * On item check in [SLC]
+         */
+        SVR_CheckIn,
+        /**
+         * On item checkout [SLC]
+         */
+        SVR_CheckOut,
+        /**
+         * Health poll request [Server]
+         */
+        SVR_HealthPollRequest,
+        /**
+         * Health poll response [SLC]
+         */
+        SVR_HealthPollResponse,
     } // Type
 } // Msg

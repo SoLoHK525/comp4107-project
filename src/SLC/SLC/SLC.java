@@ -6,6 +6,8 @@ import AppKickstarter.timer.Timer;
 import SLC.SLC.Handlers.MouseClick.MainMenuMouseClickHandler;
 import SLC.SLC.Handlers.MouseClick.MouseClickHandler;
 import SLC.SLC.Handlers.MouseClick.TouchScreenConfirmationMouseClickHandler;
+import SLC.SLC.Services.DiagnosticService;
+import SLC.SLC.Services.Service;
 
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -37,6 +39,12 @@ public class SLC extends AppThread {
         touchDisplayMBox = appKickstarter.getThread("TouchDisplayHandler").getMBox();
         octopusCardReaderMBox = appKickstarter.getThread("OctopusCardReaderDriver").getMBox();
         lockerMBox = appKickstarter.getThread("Locker").getMBox();
+
+        /**
+         * Services
+         */
+        Service currentService = null; // checkin / checkout;
+        DiagnosticService diagnosticService = null;
 
         for (boolean quit = false; !quit; ) {
             Msg msg = mbox.receive();
@@ -107,7 +115,13 @@ public class SLC extends AppThread {
                 case BR_BarcodeRead:
                     log.info("[" + msg.getSender() + "(Received Barcode): " + msg.getDetails() + "]");
                     break;
-
+                case SVR_ReserveRequest:
+                case SVR_BarcodeVerified:
+                case SVR_HealthPollRequest:
+                    // add service
+                    currentService.onServerMessage(msg);
+                    diagnosticService.onServerMessage(msg);
+                    break;
                 default:
                     log.warning(id + ": unknown message type: [" + msg + "]");
             }
@@ -130,6 +144,7 @@ public class SLC extends AppThread {
 		MouseClickHandler handler = new MainMenuMouseClickHandler();
 
 		handler.listenButtonClick(0, () -> {
+            // callback
 			System.out.println("oh shit i clicked the left");
 			touchDisplayMBox.send(new Msg(id, mbox, Msg.Type.TD_ChangeTextLabel, "title This is the changed title"));
 		});
