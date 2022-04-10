@@ -27,23 +27,32 @@ public class CheckInService extends Service {
         super(instance);
         slc.getLogger().info("Starting Check in service");
 
+        slc.setScreen(Screen.Text);
+
+        System.out.println("Running check in service");
+
+        Platform.runLater(() -> {
+            slc.setScreenText("title", "Welcome!");
+            slc.setScreenText("subtitle", "XXX Smart Locker");
+            slc.setScreenText("body", "Scan a barcode to checkin your delivery ticket.");
+        });
         serverMBox = slc.getServerMBox();
         MBox barcodeReaderMBox = slc.getBarcodeReaderMBox();
         barcodeReaderMBox.send(slc.GenerateMsg(Msg.Type.BR_GoActive, ""));
     }
 
     @Override
-    public void onServerMessage(Msg msg) {
+    public void onMessage(Msg message) {
         try {
-            switch (msg.getType()) {
+            switch (message.getType()) {
                 case Error:
                     slc.EndService();
                     break;
                 case BR_BarcodeRead:
-                    SendBarcodeToServer(msg);
+                    SendBarcodeToServer(message);
                     break;
                 case SVR_BarcodeVerified:
-                    VerifiedResponseDto res = SerializableDto.from(msg.getDetails());
+                    VerifiedResponseDto res = SerializableDto.from(message.getDetails());
                     if(!res.verified) {
                         slc.EndService();
                     } else{
@@ -79,19 +88,8 @@ public class CheckInService extends Service {
         return String.format("%06d", new Random().nextInt(999999));
     }
 
-        slc.setScreen(Screen.Text);
 
-        System.out.println("Running check in service");
 
-        Platform.runLater(() -> {
-            slc.setScreenText("title", "Welcome!");
-            slc.setScreenText("subtitle", "XXX Smart Locker");
-            slc.setScreenText("body", "Scan a barcode to checkin your delivery ticket.");
-        });
-    }
-
-    @Override
-    public void onMessage(Msg message) {
 
     private void SendBarcodeToServer(Msg msg) throws IOException {
         BarcodeVerificationDto dto = new BarcodeVerificationDto();

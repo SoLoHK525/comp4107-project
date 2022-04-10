@@ -9,17 +9,13 @@ import SLC.SLC.DataStore.Interface.LockerSize;
 import SLC.SLC.DataStore.SerializableDto;
 import SLC.SLC.Handlers.MouseClick.MainMenuMouseClickHandler;
 import SLC.SLC.Handlers.MouseClick.MouseClickHandler;
-import SLC.SLC.Handlers.MouseClick.TouchScreenConfirmationMouseClickHandler;
 import SLC.SLC.Services.CheckInService;
 import SLC.SLC.Services.DiagnosticService;
 import SLC.SLC.Services.Service;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.concurrent.ThreadLocalRandom;
-import java.util.concurrent.locks.Lock;
 import java.util.logging.Logger;
 import SLC.SLC.Handlers.MouseClick.ConfirmationMouseClickHandler;
 import SLC.SLC.Handlers.MouseClick.PasscodeMouseClickHandler;
@@ -42,7 +38,6 @@ public class SLC extends AppThread {
     private Screen screen;
     MouseClickHandler mouseClickHandler;
 
-    private Service currentService;
 
     //------------------------------------------------------------
     // SLC
@@ -208,9 +203,9 @@ public class SLC extends AppThread {
                 case SVR_HealthPollRequest:
                     // add service
                     if(this.currentService != null) {
-                        this.currentService.onServerMessage(msg);
+                        this.currentService.onMessage(msg);
                     }
-                    diagnosticService.onServerMessage(msg);
+                    diagnosticService.onMessage(msg);
                     break;
                 default:
                     log.warning(id + ": unknown message type: [" + msg + "]");
@@ -295,20 +290,6 @@ public class SLC extends AppThread {
         // Use different handler according which screen is being displayed
         MouseClickHandler handler = new MainMenuMouseClickHandler();
 
-        handler.listenButtonClick(0, () -> {
-            // callback
-            System.out.println("oh shit i clicked the left");
-            touchDisplayMBox.send(new Msg(id, mbox, Msg.Type.TD_ChangeTextLabel, "title This is the changed title"));
-        });
-
-        handler.listenButtonClick(1, () -> {
-            System.out.println("oh shit i clicked the right");
-            touchDisplayMBox.send(new Msg(id, mbox, Msg.Type.TD_UpdateDisplay, "MainMenu"));
-        });
-
-        handler.listenButtonClick(2, () -> {
-            this.currentService = new CheckInService(this);
-        });
 
         System.out.println("Button: " + handler.getClickedButtonIndex(x, y));
         handler.handleButtonClick(x, y);
