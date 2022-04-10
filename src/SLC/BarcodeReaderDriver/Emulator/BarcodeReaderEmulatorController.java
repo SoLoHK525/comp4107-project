@@ -93,7 +93,7 @@ public class BarcodeReaderEmulatorController {
                 break;
 
             case "Send Barcode":
-                if (barcodeReaderStatusField.getText().equals("Standby") || barcodeReaderStatusField.getText().equals("Active")){
+                if (barcodeReaderStatusField.getText().equals("Standby")){
                     barcodeReaderTextArea.appendText("Barcode Reader status: " + barcodeReaderStatusField.getText() + "\n");
                     barcodeReaderTextArea.appendText("Not Available for Reading Barcode." + "\n");
                     break;

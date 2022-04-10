@@ -41,6 +41,7 @@ public class EmulatorViewController extends Observable {
             LockerGrids.getColumnConstraints().add(cons);
         }
         Button locker = new Button(id);
+        locker.setDisable(true);
         locker.setOnAction(this::onLockerClicked);
         locker.setMinSize(100, 30);
         locker.setAlignment(Pos.CENTER);
@@ -54,6 +55,7 @@ public class EmulatorViewController extends Observable {
             if (!(locker instanceof Button)) continue;
             Button lockerBtn = (Button) locker;
             if (lockerBtn.getText().equals(id)) {
+                lockerBtn.setDisable(isLock);
                 if (!isLock) {
                     lockerBtn.setStyle(UNLOCK_BG);
                 } else {
