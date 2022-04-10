@@ -10,5 +10,5 @@ public abstract class Service {
         this.slc = instance;
     }
 
-    public abstract void onServerMessage(Msg message);
+    public abstract void onMessage(Msg message);
 }

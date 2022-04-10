@@ -23,7 +23,7 @@ public abstract class MouseClickHandler {
         }
     }
 
-    public void listenButtonClick(int index, OnButtonClick callback) {
+    public void onClick(int index, OnButtonClick callback) {
         this.handlers.put(index, callback);
     }
 
