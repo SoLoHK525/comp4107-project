@@ -10,25 +10,23 @@
 <?import javafx.scene.layout.RowConstraints?>
 <?import javafx.scene.shape.Line?>
 <?import javafx.scene.shape.Rectangle?>
+<?import javafx.scene.text.Font?>
 <?import javafx.scene.text.Text?>
 
-<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="570.0" prefWidth="680.0" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="SLC.TouchDisplayHandler.Emulator.ScreenController.MainMenuController">
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="520.0" prefWidth="680.0" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="SLC.TouchDisplayHandler.Emulator.ScreenController.TextController">
     <children>
         <AnchorPane prefHeight="480.0" prefWidth="640.0" AnchorPane.leftAnchor="20" AnchorPane.topAnchor="20">
             <children>
-                <Rectangle arcHeight="5.0" arcWidth="5.0" fill="white" height="70.0" stroke="BLACK" strokeType="OUTSIDE" width="300.0" AnchorPane.bottomAnchor="0" AnchorPane.leftAnchor="0" />
-                <Rectangle arcHeight="5.0" arcWidth="5.0" fill="white" height="70.0" stroke="BLACK" strokeType="OUTSIDE" width="300.0" AnchorPane.bottomAnchor="0" AnchorPane.rightAnchor="0" />
-                <Rectangle arcHeight="5.0" arcWidth="5.0" fill="white" height="70.0" stroke="BLACK" strokeType="OUTSIDE" width="300.0" AnchorPane.bottomAnchor="70" AnchorPane.leftAnchor="0" />
-                <Rectangle arcHeight="5.0" arcWidth="5.0" fill="white" height="70.0" stroke="BLACK" strokeType="OUTSIDE" width="300.0" AnchorPane.bottomAnchor="70" AnchorPane.rightAnchor="0" />
-                <Rectangle arcHeight="5.0" arcWidth="5.0" fill="white" height="70.0" stroke="BLACK" strokeType="OUTSIDE" width="300.0" AnchorPane.bottomAnchor="140" AnchorPane.leftAnchor="0" />
-                <Rectangle arcHeight="5.0" arcWidth="5.0" fill="white" height="70.0" stroke="BLACK" strokeType="OUTSIDE" width="300.0" AnchorPane.bottomAnchor="140" AnchorPane.rightAnchor="0" />
-                <Rectangle arcHeight="5.0" arcWidth="5.0" fill="TRANSPARENT" height="480.0" onMouseClicked="#td_mouseClick" stroke="BLACK" strokeType="OUTSIDE" width="640" AnchorPane.bottomAnchor="0" AnchorPane.leftAnchor="0" AnchorPane.topAnchor="0" />
-            <Text fx:id="button0" layoutX="129.0" layoutY="306.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Button 0" textAlignment="CENTER" textOrigin="CENTER" />
-            <Text fx:id="button1" layoutX="129.0" layoutY="376.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Button 1" textAlignment="CENTER" textOrigin="CENTER" />
-            <Text fx:id="button2" layoutX="128.0" layoutY="446.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Button 2" textAlignment="CENTER" textOrigin="CENTER" />
-            <Text fx:id="button3" layoutX="468.0" layoutY="306.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Button 3" textAlignment="CENTER" textOrigin="CENTER" />
-            <Text fx:id="button4" layoutX="468.0" layoutY="376.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Button 4" textAlignment="CENTER" textOrigin="CENTER" />
-            <Text fx:id="button5" layoutX="468.0" layoutY="446.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Button 5" textAlignment="CENTER" textOrigin="CENTER" />
+                <Text id="Title" fx:id="title" layoutX="37.0" layoutY="45.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Title" textAlignment="CENTER" textOrigin="CENTER">
+               <font>
+                  <Font size="24.0" />
+               </font></Text>
+                <Text id="subtitle" fx:id="subtitle" layoutX="39.0" layoutY="67.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Subtitle" textAlignment="CENTER" textOrigin="CENTER">
+               <font>
+                  <Font size="16.0" />
+               </font></Text>
+                <Rectangle arcHeight="5.0" arcWidth="5.0" fill="TRANSPARENT" height="480.0" onMouseClicked="#td_mouseClick" stroke="BLACK" strokeType="OUTSIDE" visible="false" width="640" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="0.0" />
+            <Text id="body" fx:id="body" layoutX="38.0" layoutY="99.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Body" textAlignment="CENTER" textOrigin="CENTER" />
             </children>
         </AnchorPane>
         <Rectangle arcHeight="5.0" arcWidth="5.0" fill="#d7d7d7" height="50.0" stroke="TRANSPARENT" strokeType="INSIDE" width="680.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" />
@@ -55,7 +53,7 @@
                     </items>
                 </ChoiceBox>
                 <Label text="Screen Switcher (for hacking): " GridPane.columnIndex="2" GridPane.rowIndex="0" />
-                <ChoiceBox fx:id="screenSwitcherCBox" prefHeight="25.0" prefWidth="177.0" value="Main Menu" GridPane.columnIndex="3" GridPane.rowIndex="0">
+                <ChoiceBox fx:id="screenSwitcherCBox" prefHeight="25.0" prefWidth="177.0" value="Confirmation" GridPane.columnIndex="3" GridPane.rowIndex="0">
                     <items>
                         <FXCollections fx:factory="observableArrayList">
                             <String fx:value="Blank" />
