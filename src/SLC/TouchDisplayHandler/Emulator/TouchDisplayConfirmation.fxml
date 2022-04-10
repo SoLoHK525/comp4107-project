@@ -13,7 +13,7 @@
 <?import javafx.scene.shape.Rectangle?>
 <?import javafx.scene.text.Text?>
 
-<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="520.0" prefWidth="680.0" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="SLC.TouchDisplayHandler.Emulator.ScreenController.TouchScreenConfirmationController">
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="520.0" prefWidth="680.0" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="SLC.TouchDisplayHandler.Emulator.ScreenController.ConfirmationController">
     <children>
         <AnchorPane prefHeight="480.0" prefWidth="640.0" AnchorPane.leftAnchor="20" AnchorPane.topAnchor="20">
             <children>

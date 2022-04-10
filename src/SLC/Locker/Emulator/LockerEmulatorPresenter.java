@@ -13,11 +13,13 @@ import java.util.Observer;
 
 public class LockerEmulatorPresenter implements Observer {
 
+    private LockerEmulator emulator;
     private EmulatorViewController viewController;
     private LockerEmulatorModel lockerModel;
 
 
-    public LockerEmulatorPresenter(LockerEmulatorModel lockerModel) {
+    public LockerEmulatorPresenter(LockerEmulator emulator, LockerEmulatorModel lockerModel) {
+        this.emulator = emulator;
         this.lockerModel = lockerModel;
     }
 
@@ -52,13 +54,14 @@ public class LockerEmulatorPresenter implements Observer {
         return viewController.getPoll();
     }
 
-    public String getLockStatus(String id) {
-        return this.lockerModel.GetLockStatusByID(id) ? "Locked" : "Unlocked";
+    public boolean getLockStatus(String id) {
+        return this.lockerModel.GetLockStatusByID(id);
     }
 
     public void lockingOperation(String id, boolean isLock) {
         this.lockerModel.UpdateStatusByID(id, isLock);
         this.viewController.SetLocker(id, isLock);
+        if(isLock) this.emulator.emitLocked(id);
     }
 
     @Override

@@ -187,7 +187,7 @@ public class Msg {
          */
         LK_CheckStatus,
         /**
-         *  Return lock status of a locker
+         *  Return lock status of a locker with given slotID
          */
         LK_ReturnStatus,
         /**
@@ -226,14 +226,7 @@ public class Msg {
          * Health poll response [SLC]
          */
         SVR_HealthPollResponse,
-        /**
-         * Verify access code during checkout [touch display]
-         */
-        VerifyAccessCode,
-        /**
-         * access code verified message [SLC]
-         */
-        AccessCodeVerified,
+
 
     } // Type
 } // Msg

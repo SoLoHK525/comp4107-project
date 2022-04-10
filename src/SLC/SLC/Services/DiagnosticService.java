@@ -9,7 +9,7 @@ public class DiagnosticService extends Service {
     }
 
     @Override
-    public void onServerMessage(Msg message) {
+    public void onMessage(Msg message) {
 
     }
 }
