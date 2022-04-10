@@ -21,6 +21,10 @@ import java.util.HashMap;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.locks.Lock;
 import java.util.logging.Logger;
+import SLC.SLC.Handlers.MouseClick.ConfirmationMouseClickHandler;
+import SLC.SLC.Handlers.MouseClick.PasscodeMouseClickHandler;
+import SLC.SLC.Services.*;
+import javafx.application.Platform;
 
 
 //======================================================================
@@ -35,6 +39,11 @@ public class SLC extends AppThread {
     private Service currentService;
     private HashMap<String, Locker> checkInPackage;
 
+    private Screen screen;
+    MouseClickHandler mouseClickHandler;
+
+    private Service currentService;
+
     //------------------------------------------------------------
     // SLC
     public SLC(String id, AppKickstarter appKickstarter) throws Exception {
@@ -42,6 +51,67 @@ public class SLC extends AppThread {
         pollingTime = Integer.parseInt(appKickstarter.getProperty("SLC.PollingTime"));
     } // SLC
 
+    public void setScreen(Screen screen) {
+        this.screen = screen;
+
+        switch (screen) {
+            case MainMenu:
+                touchDisplayMBox.send(new Msg(id, touchDisplayMBox, Msg.Type.TD_UpdateDisplay, "MainMenu"));
+                mouseClickHandler = new MainMenuMouseClickHandler();
+                break;
+            case Confirmation:
+                touchDisplayMBox.send(new Msg(id, touchDisplayMBox, Msg.Type.TD_UpdateDisplay, "Confirmation"));
+                mouseClickHandler = new ConfirmationMouseClickHandler();
+            case Passcode:
+                touchDisplayMBox.send(new Msg(id, touchDisplayMBox, Msg.Type.TD_UpdateDisplay, "Passcode"));
+                mouseClickHandler = new PasscodeMouseClickHandler();
+                break;
+            case Text:
+                touchDisplayMBox.send(new Msg(id, touchDisplayMBox, Msg.Type.TD_UpdateDisplay, "Text"));
+                mouseClickHandler = null;
+                break;
+            case Empty:
+                touchDisplayMBox.send(new Msg(id, touchDisplayMBox, Msg.Type.TD_UpdateDisplay, "Empty"));
+                mouseClickHandler = null;
+                break;
+            default:
+                mouseClickHandler = null;
+                break;
+        }
+    }
+
+    public Service setService(UserService service) {
+        Service newService;
+
+        switch (service) {
+            case CheckIn:
+                newService = new CheckInService(this);
+                break;
+            case CheckOut:
+                newService = new CheckOutService(this);
+                break;
+            case SelectScreen:
+                newService = new SelectScreenService(this);
+                break;
+            default:
+                throw new IllegalStateException("Unexpected value: " + service);
+        }
+
+        this.currentService = newService;
+
+        return newService;
+    }
+
+    public MouseClickHandler getMouseClickHandler() {
+        return mouseClickHandler;
+    }
+
+    public void setScreenText(String elementId, String content) {
+        // TODO: enforcing Platform.runLater here is to temporary resolve the concurrency bug while updating the text label.
+        Platform.runLater(() -> {
+            touchDisplayMBox.send(new Msg(id, touchDisplayMBox, Msg.Type.TD_ChangeTextLabel, elementId + " " + content));
+        });
+    }
 
     //------------------------------------------------------------
     // run
@@ -61,6 +131,7 @@ public class SLC extends AppThread {
          * Services
          */
         currentService = null; // checkin / checkout;
+        this.setService(UserService.SelectScreen); // select / checkin / checkout;
         DiagnosticService diagnosticService = new DiagnosticService(this);
 
         for (boolean quit = false; !quit; ) {
@@ -144,6 +215,10 @@ public class SLC extends AppThread {
                 default:
                     log.warning(id + ": unknown message type: [" + msg + "]");
             }
+
+
+            currentService.onMessage(msg);
+            diagnosticService.onMessage(msg);
         }
 
         // declaring our departure
@@ -237,6 +312,10 @@ public class SLC extends AppThread {
 
         System.out.println("Button: " + handler.getClickedButtonIndex(x, y));
         handler.handleButtonClick(x, y);
+		// Use different handler according which screen is being displayed
+        if(mouseClickHandler != null) {
+            mouseClickHandler.handleButtonClick(x, y);
+        }
     } // processMouseClicked
 
 

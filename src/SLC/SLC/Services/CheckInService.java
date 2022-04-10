@@ -13,6 +13,8 @@ import com.sun.org.apache.xpath.internal.operations.Bool;
 import java.io.IOException;
 import java.util.Date;
 import java.util.Random;
+import SLC.SLC.Screen;
+import javafx.application.Platform;
 
 public class CheckInService extends Service {
     //STATE
@@ -76,6 +78,20 @@ public class CheckInService extends Service {
     private String GenAccessCode() {
         return String.format("%06d", new Random().nextInt(999999));
     }
+
+        slc.setScreen(Screen.Text);
+
+        System.out.println("Running check in service");
+
+        Platform.runLater(() -> {
+            slc.setScreenText("title", "Welcome!");
+            slc.setScreenText("subtitle", "XXX Smart Locker");
+            slc.setScreenText("body", "Scan a barcode to checkin your delivery ticket.");
+        });
+    }
+
+    @Override
+    public void onMessage(Msg message) {
 
     private void SendBarcodeToServer(Msg msg) throws IOException {
         BarcodeVerificationDto dto = new BarcodeVerificationDto();

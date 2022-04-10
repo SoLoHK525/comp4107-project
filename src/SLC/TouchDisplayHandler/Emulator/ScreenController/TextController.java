@@ -7,11 +7,10 @@ import javafx.scene.text.Text;
 
 import java.util.logging.Logger;
 
-public class TouchScreenConfirmationController extends TouchDisplayEmulatorController {
+public class TextController extends TouchDisplayEmulatorController {
     public Text title;
     public Text subtitle;
-    public Text rightButtonLabel;
-    public Text leftButtonLabel;
+    public Text body;
 
     @Override
     public void initialize(String id, AppKickstarter appKickstarter, Logger log, TouchDisplayEmulator touchDisplayEmulator, String pollRespParam) {
@@ -28,11 +27,8 @@ public class TouchScreenConfirmationController extends TouchDisplayEmulatorContr
             case "subtitle":
                 target = subtitle;
                 break;
-            case "rightButton":
-                target = rightButtonLabel;
-                break;
-            case "leftButton":
-                target = leftButtonLabel;
+            case "body":
+                target = body;
                 break;
             default:
                 return;
