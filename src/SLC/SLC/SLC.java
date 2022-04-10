@@ -3,12 +3,14 @@ package SLC.SLC;
 import AppKickstarter.AppKickstarter;
 import AppKickstarter.misc.*;
 import AppKickstarter.timer.Timer;
+import SLC.SLC.DataStore.Dto.CheckOut.CheckOutDto;
 import SLC.SLC.Handlers.MouseClick.MainMenuMouseClickHandler;
 import SLC.SLC.Handlers.MouseClick.MouseClickHandler;
 import SLC.SLC.Handlers.MouseClick.TouchScreenConfirmationMouseClickHandler;
 import SLC.SLC.Services.DiagnosticService;
 import SLC.SLC.Services.Service;
 
+import java.io.IOException;
 import java.util.concurrent.ThreadLocalRandom;
 
 
@@ -20,6 +22,11 @@ public class SLC extends AppThread {
     private MBox touchDisplayMBox;
     private MBox octopusCardReaderMBox;
     private MBox lockerMBox;
+
+    private String accessCode;
+    private int pickUpTime;
+    private double amount = 0;
+    private String octopusCardNo;
 
     //------------------------------------------------------------
     // SLC
@@ -78,8 +85,10 @@ public class SLC extends AppThread {
                     break;
 
                 case OCR_CardRead:
-                    log.info("Octopus Card " + msg.getDetails() + " is charged");
+                    octopusCardNo = msg.getDetails();
+                    log.info("Octopus Card " + octopusCardNo + " is charged");
                     octopusCardReaderMBox.send(new Msg(id, mbox, Msg.Type.OCR_Charged, ""));
+                    //lockerMBox.send(new Msg(id, mbox, Msg.Type.LK_Unlock, <corresponding slot id>));
                     break;
 
                 case OCR_GoActive:
@@ -93,9 +102,9 @@ public class SLC extends AppThread {
                 case Terminate:
                     quit = true;
                     break;
-                
+
                 case BR_GoActive:
-                    if (msg.getSender().equals("BarcodeReaderDriver")){
+                    if (msg.getSender().equals("BarcodeReaderDriver")) {
                         log.info("Activation Response: " + msg.getDetails());
                         break;
                     }
@@ -104,7 +113,7 @@ public class SLC extends AppThread {
                     break;
 
                 case BR_GoStandby:
-                    if (msg.getSender().equals("BarcodeReaderDriver")){
+                    if (msg.getSender().equals("BarcodeReaderDriver")) {
                         log.info("Standby Response: " + msg.getDetails());
                         break;
                     }
@@ -115,6 +124,36 @@ public class SLC extends AppThread {
                 case BR_BarcodeRead:
                     log.info("[" + msg.getSender() + "(Received Barcode): " + msg.getDetails() + "]");
                     break;
+
+                case VerifyAccessCode:
+                    accessCode = msg.getDetails();
+                    //verify the received access code from the checkin package's hash map
+                    //if access code valid
+                    /*
+                    pickUpTime = (int) (System.currentTimeMillis() / 1000L);
+                    int storedDuration = pickUpTime - (checkinTime);
+                    int late = 86400;
+                    while(storedDuration > late) {
+                        amount += 20;
+                        late += 86400;
+                    }
+                    touchDisplayMBox.send(new Msg(id, mbox, Msg.Type.AccessCodeVerified, Double.toString(amount)));
+                     */
+                    //else
+                    touchDisplayMBox.send(new Msg(id, mbox, Msg.Type.AccessCodeVerified, "false"));
+                    break;
+
+                case LK_Locked:
+                    CheckOutDto checkOut = new CheckOutDto(accessCode, octopusCardNo, amount, pickUpTime);
+                    try {
+                        currentService.onServerMessage(new Msg(id, mbox, Msg.Type.SVR_CheckOut, checkOut.toBase64()));
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                    //**delete this access code's key value pair from the hash map
+
+                    break;
+
                 case SVR_ReserveRequest:
                 case SVR_BarcodeVerified:
                 case SVR_HealthPollRequest:

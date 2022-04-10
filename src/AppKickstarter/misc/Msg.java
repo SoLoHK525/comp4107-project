@@ -191,6 +191,10 @@ public class Msg {
          */
         LK_ReturnStatus,
         /**
+         *  Return locked event to slc once locker is closed
+         */
+        LK_Locked,
+        /**
          * Reserve request [Server]
          */
         SVR_ReserveRequest,
@@ -222,5 +226,14 @@ public class Msg {
          * Health poll response [SLC]
          */
         SVR_HealthPollResponse,
+        /**
+         * Verify access code during checkout [touch display]
+         */
+        VerifyAccessCode,
+        /**
+         * access code verified message [SLC]
+         */
+        AccessCodeVerified,
+
     } // Type
 } // Msg

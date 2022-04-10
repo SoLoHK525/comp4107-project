@@ -10,6 +10,7 @@ public class CheckOutService extends Service {
 
     @Override
     public void onServerMessage(Msg message) {
+        //serverMBox.send(new Msg(id, mbox, Msg.Type.SVR_CheckOut, message.getDetails()));
 
     }
 }
