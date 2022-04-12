@@ -5,6 +5,8 @@ import AppKickstarter.misc.*;
 import AppKickstarter.timer.Timer;
 import SLC.SLC.DataStore.Dto.CheckIn.ReservationRequestDto;
 import SLC.SLC.DataStore.Dto.CheckIn.ReservedResponseDto;
+import SLC.SLC.DataStore.Dto.Common.LockerDto;
+import SLC.SLC.DataStore.Dto.SLC.SLCStateDto;
 import SLC.SLC.DataStore.Interface.Locker;
 import SLC.SLC.DataStore.Interface.LockerSize;
 import SLC.SLC.DataStore.SerializableDto;
@@ -15,9 +17,11 @@ import SLC.SLC.Services.CheckInService;
 import SLC.SLC.Services.DiagnosticService;
 import SLC.SLC.Services.Service;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.logging.Logger;
 import SLC.SLC.Handlers.MouseClick.ConfirmationMouseClickHandler;
 import SLC.SLC.Handlers.MouseClick.PasscodeMouseClickHandler;
@@ -36,16 +40,11 @@ public class SLC extends AppThread {
     private MBox octopusCardReaderMBox;
     private MBox lockerMBox;
     private MBox serverMBox;
-    private ArrayList<Locker> lockers;
     private Service currentService;
+    private ArrayList<Locker> lockers;
     private HashMap<String, Locker> checkInPackage;
 
     private int slcTimerID;
-
-    private String accessCode;
-    private int pickUpTime;
-    private double amount = 0;
-    private String octopusCardNo;
 
     private Screen screen;
     MouseClickHandler mouseClickHandler;
@@ -57,6 +56,7 @@ public class SLC extends AppThread {
     public SLC(String id, AppKickstarter appKickstarter) throws Exception {
         super(id, appKickstarter);
         pollingTime = Integer.parseInt(appKickstarter.getProperty("SLC.PollingTime"));
+        this.loadState();
     } // SLC
 
     public void setOnScreenLoaded(Runnable e) {
@@ -186,7 +186,7 @@ public class SLC extends AppThread {
                     break;
 
                 case OCR_CardRead:
-                    octopusCardNo = msg.getDetails();
+                    String octopusCardNo = msg.getDetails();
                     log.info("Octopus Card " + octopusCardNo + " is charged");
                     octopusCardReaderMBox.send(new Msg(id, mbox, Msg.Type.OCR_Charged, ""));
                     //lockerMBox.send(new Msg(id, mbox, Msg.Type.LK_Unlock, <corresponding slot id>));
@@ -202,6 +202,7 @@ public class SLC extends AppThread {
 
                 case Terminate:
                     quit = true;
+                    this.saveState();
                     break;
 
                 case BR_ReturnActive:
@@ -298,6 +299,51 @@ public class SLC extends AppThread {
     }
     //
 
+    private void saveState() {
+        try {
+            File stateFile = new File("SLCState.bin");
+            SLCStateDto dto = new SLCStateDto();
+
+            ArrayList<LockerDto> serializableLockers = new ArrayList<>();
+            HashMap<String, LockerDto> serializableCheckInPackage = new HashMap<>();
+
+            for (Map.Entry<String, Locker> entry : checkInPackage.entrySet()) {
+                serializableCheckInPackage.put(entry.getKey(), entry.getValue().toDto());
+            }
+
+            for(Locker locker : lockers) {
+                serializableLockers.add(locker.toDto());
+            }
+
+            dto.lockers = serializableLockers;
+            dto.checkInPackage = serializableCheckInPackage;
+
+            dto.save(stateFile);
+        } catch (IOException exception) {
+            this.log.warning(this.id + ": error occurred while saving SLC state: " + exception.getMessage());
+        }
+    }
+
+    private void loadState() {
+        try {
+            File stateFile = new File("SLCState.bin");
+
+            if(stateFile.exists()) {
+                SLCStateDto dto = SLCStateDto.from(stateFile);
+
+                for(LockerDto locker : dto.lockers) {
+                    lockers.add(Locker.fromDto(locker));
+                }
+
+                for(Map.Entry<String, LockerDto> entry : dto.checkInPackage.entrySet()) {
+                    checkInPackage.put(entry.getKey(), Locker.fromDto(entry.getValue()));
+                }
+            }
+        } catch (IOException | ClassNotFoundException e) {
+            this.log.warning(this.id + ": Failed to load state from SLCState.bin, error: " + e.getMessage());
+        }
+    }
+
     //------------------------------------------------------------
     // GenerateMsg
     public Msg GenerateMsg(Msg.Type type, String detail) {
@@ -321,8 +367,7 @@ public class SLC extends AppThread {
         // Use different handler according which screen is being displayed
         MouseClickHandler handler = new MainMenuMouseClickHandler();
 
-
-        System.out.println("Button: " + handler.getClickedButtonIndex(x, y));
+        // System.out.println("Button: " + handler.getClickedButtonIndex(x, y));
         handler.handleButtonClick(x, y);
 		// Use different handler according which screen is being displayed
         if(mouseClickHandler != null) {

@@ -21,7 +21,7 @@ public class CheckOutService extends Service {
      */
     private String accessCode;
     private int pickUpTime;
-    private float amount;
+    private double amount;
     private String octopusCardNo;
     private Locker locker;
 
@@ -56,7 +56,7 @@ public class CheckOutService extends Service {
             if (locker == null) {
                 this.displayInvalidAccessCodeError();
             } else {
-                double fine = calculateFine(passcode);
+                amount = calculateFine(passcode);
 
                 if (amount == 0.0) {
                     openLocker(locker);
