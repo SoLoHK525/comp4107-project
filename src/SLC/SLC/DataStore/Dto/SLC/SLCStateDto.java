@@ -9,5 +9,5 @@ import java.util.HashMap;
 
 public class SLCStateDto extends SerializableDto {
     public ArrayList<LockerDto> lockers;
-    public HashMap<String, String> checkInPackage;
+    public HashMap<String, LockerDto> checkInPackage;
 }

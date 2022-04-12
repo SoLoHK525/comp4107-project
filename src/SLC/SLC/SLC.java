@@ -40,8 +40,8 @@ public class SLC extends AppThread {
     private MBox octopusCardReaderMBox;
     private MBox lockerMBox;
     private MBox serverMBox;
-    private Service currentService;
     private ArrayList<Locker> lockers;
+    private Service currentService;
     private HashMap<String, Locker> checkInPackage;
 
     private int slcTimerID;
