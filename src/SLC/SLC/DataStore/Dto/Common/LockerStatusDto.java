@@ -9,5 +9,6 @@ import java.util.ArrayList;
  * Send Locker status to server
  */
 public class LockerStatusDto extends SerializableDto {
-    ArrayList<Locker> lockers;
+    public ArrayList<LockerDto> lockers;
+
 }
