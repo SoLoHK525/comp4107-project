@@ -367,6 +367,10 @@ public class SLC extends AppThread {
     public void setCheckInPackage(String accessCode, Locker locker) {
        this.checkInPackage.put(accessCode, locker);
     }
+
+    public String GetProperty(String propertyName) {
+       return this.appKickstarter.getProperty(propertyName);
+    }
     //Getters
 
 } // SLC
