@@ -35,6 +35,7 @@ public class SLC extends AppThread {
     private MBox touchDisplayMBox;
     private MBox octopusCardReaderMBox;
     private MBox lockerMBox;
+    private MBox serverMBox;
     private ArrayList<Locker> lockers;
     private Service currentService;
     private HashMap<String, Locker> checkInPackage;
@@ -154,6 +155,7 @@ public class SLC extends AppThread {
         touchDisplayMBox = appKickstarter.getThread("TouchDisplayHandler").getMBox();
         octopusCardReaderMBox = appKickstarter.getThread("OctopusCardReaderDriver").getMBox();
         lockerMBox = appKickstarter.getThread("Locker").getMBox();
+        serverMBox = appKickstarter.getThread("ServerDriver").getMBox();
 
         lockers = initLockers();
         checkInPackage = new HashMap<>();
@@ -296,6 +298,7 @@ public class SLC extends AppThread {
                 if (locker.getSize() == msgDetail.lockerSize) {
                     locker.setReserved(true);
                     ReservedResponseDto res = new ReservedResponseDto();
+                    res.barcode = msgDetail.barcode;
                     res.hasLocker = true;
                     res.reservedLocker = locker.toDto();
                     String dtoStr = res.toBase64();
@@ -356,7 +359,7 @@ public class SLC extends AppThread {
 
     public MBox getServerMBox() {
         //  Temp
-        return this.lockerMBox;
+        return serverMBox;
     }
 
     public MBox getBarcodeReaderMBox() {

@@ -39,6 +39,7 @@ public class CheckInService extends Service {
             slc.setScreenText("subtitle", "XXX Smart Locker");
             slc.setScreenText("body", "Scan a barcode to checkin your delivery ticket.");
         });
+
         serverMBox = slc.getServerMBox();
         MBox barcodeReaderMBox = slc.getBarcodeReaderMBox();
         barcodeReaderMBox.send(slc.GenerateMsg(Msg.Type.BR_GoActive, ""));
@@ -71,6 +72,7 @@ public class CheckInService extends Service {
             }
         } catch (Exception e) {
             System.out.println(e);
+            e.printStackTrace();
         }
     }
 
@@ -92,9 +94,6 @@ public class CheckInService extends Service {
     private String GenAccessCode() {
         return String.format("%06d", new Random().nextInt(999999));
     }
-
-
-
 
     private void SendBarcodeToServer(Msg msg) throws IOException {
         BarcodeVerificationDto dto = new BarcodeVerificationDto();
