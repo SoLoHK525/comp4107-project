@@ -107,28 +107,28 @@ public class SLC extends AppThread {
     }
 
     public String verifyAccessCode(String code) {
-        //verify the received access code from the checkin package's hash map
-        //if access code valid
-        accessCode = code;
-                    /*
-                    pickUpTime = (int) (System.currentTimeMillis() / 1000L);
-                    int storedDuration = pickUpTime - (checkinTime);
-                    int late = 86400;
-                    while(storedDuration > late) {
-                        amount += 20;
-                        late += 86400;
-                    }
+        //verify the received access code from the hash map "checkInPackage"
+        if(checkInPackage.containsKey(code)) {
+            Locker locker = checkInPackage.get(code);
+            accessCode = code;
+            pickUpTime = (int) (System.currentTimeMillis() / 1000L);
+            int storedDuration = pickUpTime - locker.getLastUpdate();
+            int late = 86400;   //24hr
+            while(storedDuration > late) {
+                amount += 20;   //charge $20 for each 24hr
+                late += 86400;
+            }
 
-                    if(amount == 0) {
-                        //lockerMBox.send(new Msg(id, mbox, Msg.Type.LK_Unlock, <corresponding slot id>));
-                    }else {
-                        octopusCardReaderMBox.send(new Msg(id, mbox, Msg.Type.OCR_GoActive, Double.toString(amount)));
-                    }
+            if(amount == 0) {
+                lockerMBox.send(new Msg(id, mbox, Msg.Type.LK_Unlock, locker.getSlotId()));
+            }else {
+                octopusCardReaderMBox.send(new Msg(id, mbox, Msg.Type.OCR_GoActive, Double.toString(amount)));
+            }
 
-                    return Double.toString(amount);
-                     */
-        //else
-        return "false";
+            return Double.toString(amount);
+        }else {
+            return "false";
+        }
     }
 
     public MouseClickHandler getMouseClickHandler() {
@@ -244,7 +244,9 @@ public class SLC extends AppThread {
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
+
                     //**delete this access code's key value pair from the hash map
+                    checkInPackage.remove(accessCode);
 
                     break;
 
