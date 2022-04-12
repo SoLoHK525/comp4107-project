@@ -12,7 +12,7 @@ Entrypoint: SLCEmulatorStarter.java
 	2. Click on File -> Project Structure -> Artifacts
 		-> Add JAR (From module with dependencies)
 		-> Select [SLCEmulatorStarter] as the Main Class
-	3. Click on Build -> Build Aritifacts...
+	3. Click on Build -> Build Artifact...
 	
 	The output jar will be located inside /out/artifacts/<name_of_artifacts>/<name_of_artifacts>.jar
 	
