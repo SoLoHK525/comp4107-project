@@ -47,8 +47,6 @@ public class SLC extends AppThread {
     // Map access code to locker's slot id
     private HashMap<String, String> checkInPackage;
 
-    private int slcTimerID;
-
     private Screen screen;
     MouseClickHandler mouseClickHandler;
 
@@ -168,9 +166,6 @@ public class SLC extends AppThread {
                 case TD_ScreenLoaded:
                     handleScreenLoaded();
                     break;
-                case LK_ReturnStatus:
-                    log.info("LK_Status: " + msg.getDetails());
-                    break;
 
                 case TimesUp:
                     if (Timer.getTimesUpMsgTimerId(msg) == pollingTimerID) {
@@ -188,9 +183,6 @@ public class SLC extends AppThread {
                     }
                     break;
 
-                case PollAck:
-                case PollNak:
-                    break;
 
                 case OCR_CardRead:
                     String octopusCardNo = msg.getDetails();
@@ -212,11 +204,6 @@ public class SLC extends AppThread {
                     this.saveState();
                     break;
 
-                case BR_ReturnActive:
-                case BR_ReturnStandby:
-                    currentService.onMessage(msg);
-                    break;
-
                 case SVR_ReserveRequest:
                     HandleReserve(msg.getDetails());
                     break;
@@ -224,15 +211,6 @@ public class SLC extends AppThread {
                 case BR_BarcodeRead:
                     log.info("[" + msg.getSender() + "(Received Barcode): " + msg.getDetails() + "]");
                     break;
-
-                case LK_Locked:
-                    break;
-
-                case SVR_BarcodeVerified:
-                case SVR_HealthPollRequest:
-                    break;
-                default:
-                    log.warning(id + ": unknown message type: [" + msg + "]");
             }
 
             // add service
