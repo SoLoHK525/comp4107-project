@@ -8,14 +8,18 @@ import SLC.SLC.DataStore.Dto.CheckIn.CheckInDto;
 import SLC.SLC.DataStore.Dto.CheckIn.VerifiedResponseDto;
 import SLC.SLC.DataStore.Interface.Locker;
 import SLC.SLC.DataStore.SerializableDto;
+import SLC.SLC.Handlers.MouseClick.ConfirmationMouseClickHandler;
+import SLC.SLC.Handlers.MouseClick.MouseClickHandler;
 import SLC.SLC.SLC;
 
 import java.io.IOException;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Objects;
 import java.util.Random;
 
 import SLC.SLC.Screen;
+import SLC.SLC.UserService;
 import javafx.application.Platform;
 
 public class CheckInService extends Service {
@@ -67,7 +71,8 @@ public class CheckInService extends Service {
                     break;
                 case Error:
                 case BR_ReturnStandby:
-                    slc.EndService();
+                    this.displaySuccessMessage();
+                    // slc.EndService();
                     break;
                 case BR_ReturnActive:
                     if (!curBarcode.equals("")) {
@@ -84,7 +89,7 @@ public class CheckInService extends Service {
                 case SVR_BarcodeVerified:
                     VerifiedResponseDto res = SerializableDto.from(message.getDetails());
                     if (!res.verified) {
-                        slc.EndService();
+                        this.displayInvalidBarcodeError();
                     } else {
                         slotID = res.slotID;
                         slc.getLockerMBox().send(slc.GenerateMsg(Msg.Type.LK_Unlock, slotID));
@@ -93,6 +98,7 @@ public class CheckInService extends Service {
                 case LK_Locked:
                     PerformCheckIn();
                     slc.getBarcodeReaderMBox().send(slc.GenerateMsg(Msg.Type.BR_GoStandby, ""));
+                    break;
             }
         } catch (Exception e) {
             System.out.println(e);
@@ -100,13 +106,56 @@ public class CheckInService extends Service {
         }
     }
 
+    private void displayInvalidBarcodeError() {
+        slc.setScreen(Screen.Confirmation);
+
+        MouseClickHandler handler = slc.getMouseClickHandler();
+
+        handler.onClick(ConfirmationMouseClickHandler.Buttons.LeftButton, () -> {
+            slc.setService(UserService.CheckIn);
+        });
+
+        handler.onClick(ConfirmationMouseClickHandler.Buttons.RightButton, () -> {
+            slc.setService(UserService.SelectScreen);
+        });
+
+        slc.setOnScreenLoaded(() -> {
+            slc.setScreenText("title", "Invalid barcode");
+            slc.setScreenText("subtitle", "Barcode invalid or it has been used already.");
+            slc.setScreenText("leftButton", "Try Again");
+            slc.setScreenText("rightButton", "Back to Main Menu");
+        });
+    }
+
+    private void displaySuccessMessage() {
+        slc.setScreen(Screen.Confirmation);
+
+        MouseClickHandler handler = slc.getMouseClickHandler();
+
+        handler.onClick(ConfirmationMouseClickHandler.Buttons.LeftButton, () -> {
+            slc.setService(UserService.CheckIn);
+        });
+
+        handler.onClick(ConfirmationMouseClickHandler.Buttons.RightButton, () -> {
+            slc.setService(UserService.SelectScreen);
+        });
+
+        slc.setOnScreenLoaded(() -> {
+            slc.setScreenText("title", "Success");
+            slc.setScreenText("subtitle", "The package has been stored successfully.");
+            slc.setScreenText("leftButton", "Continue Checkin");
+            slc.setScreenText("rightButton", "Main Menu");
+        });
+    }
+
     private void PerformCheckIn() throws IOException {
         CheckInDto dto = new CheckInDto();
         dto.access_code = GenAccessCode();
         dto.barcode = curBarcode;
         dto.timestamp = (int) new Date().getTime();
+
         for (Locker locker : slc.getLockers()) {
-            if (locker.getSlotId() == slotID) {
+            if (Objects.equals(locker.getSlotId(), slotID)) {
                 slc.setCheckInPackage(dto.access_code, locker);
                 break;
             }

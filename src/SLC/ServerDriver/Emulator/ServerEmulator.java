@@ -17,7 +17,6 @@ import javafx.stage.WindowEvent;
 
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Random;
 
 public class ServerEmulator extends ServerDriver {
@@ -27,10 +26,10 @@ public class ServerEmulator extends ServerDriver {
     private ServerEmulatorController serverEmulatorController;
 
     // Key: Barcode, Value: Locker
-    private HashMap<String, LockerDto> barcodeToLockerMap = new HashMap<>();
+    private final HashMap<String, LockerDto> barcodeToLockerMap = new HashMap<>();
 
     // Key: access code Value: barcode
-    private HashMap<String, String> accessCodeToBarcodeMap = new HashMap<>();
+    private final HashMap<String, String> accessCodeToBarcodeMap = new HashMap<>();
 
     public ServerEmulator(String id, SLCStarter slcStarter) {
         super(id, slcStarter);
@@ -102,18 +101,22 @@ public class ServerEmulator extends ServerDriver {
     protected void handleVerifyBarcode(String payload) {
         try {
             BarcodeVerificationDto dto = BarcodeVerificationDto.from(payload);
-
-            LockerDto locker = this.barcodeToLockerMap.get(dto.barcode);
-
             VerifiedResponseDto verifiedResponseDto = new VerifiedResponseDto();
 
-            if(locker != null) {
-                verifiedResponseDto.verified = true;
-                verifiedResponseDto.slotID = locker.slotId;
-            }else{
+            if(this.accessCodeToBarcodeMap.containsValue(dto.barcode)) {
                 verifiedResponseDto.verified = false;
                 verifiedResponseDto.slotID = "";
-                this.log.warning("Barcode: " + dto.barcode + "does not have a reserved locker");
+            }else{
+                LockerDto locker = this.barcodeToLockerMap.get(dto.barcode);
+
+                if(locker != null) {
+                    verifiedResponseDto.verified = true;
+                    verifiedResponseDto.slotID = locker.slotId;
+                }else{
+                    verifiedResponseDto.verified = false;
+                    verifiedResponseDto.slotID = "";
+                    this.log.warning("Barcode: " + dto.barcode + "does not have a reserved locker");
+                }
             }
 
             this.slc.send(new Msg(id, mbox, Msg.Type.SVR_BarcodeVerified, verifiedResponseDto.toBase64()));
