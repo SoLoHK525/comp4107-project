@@ -226,5 +226,7 @@ public class Msg {
          * Health poll response [SLC]
          */
         SVR_HealthPollResponse,
+
+
     } // Type
 } // Msg

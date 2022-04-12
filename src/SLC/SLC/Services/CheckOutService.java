@@ -25,7 +25,16 @@ public class CheckOutService extends Service {
 
         // when user click on the "Enter" pad
         handler.onPasscodeEnter((String passcode) -> {
-            System.out.println("Entered passcode: " + passcode);
+            System.out.println("Entered access code: " + passcode);
+            String verifyReply = slc.verifyAccessCode(passcode);
+
+            if(verifyReply.equals("false")) {
+                slc.setScreenText("title", "Invalid access code, please enter again.");
+            }else if(verifyReply.equals("0.0")) {
+                slc.setScreenText("title", "You can pick up you package now.");
+            }else {
+                slc.setScreenText("title", "You are fined $" + verifyReply + " for late pickup.");
+            }
         });
 
         /**
@@ -34,12 +43,12 @@ public class CheckOutService extends Service {
          * scene is drawn before editing the text
          */
         Platform.runLater(() -> {
-            slc.setScreenText("title", "Please enter the passcode.");
+            slc.setScreenText("title", "Please enter the access code.");
         });
     }
 
     @Override
     public void onMessage(Msg message) {
-
+        //serverMBox.send(new Msg(id, mbox, Msg.Type.SVR_CheckOut, message.getDetails()));
     }
 }

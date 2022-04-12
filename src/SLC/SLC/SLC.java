@@ -3,12 +3,15 @@ package SLC.SLC;
 import AppKickstarter.AppKickstarter;
 import AppKickstarter.misc.*;
 import AppKickstarter.timer.Timer;
+import SLC.SLC.DataStore.Dto.CheckOut.CheckOutDto;
 import SLC.SLC.Handlers.MouseClick.MainMenuMouseClickHandler;
 import SLC.SLC.Handlers.MouseClick.MouseClickHandler;
 import SLC.SLC.Handlers.MouseClick.ConfirmationMouseClickHandler;
 import SLC.SLC.Handlers.MouseClick.PasscodeMouseClickHandler;
 import SLC.SLC.Services.*;
 import javafx.application.Platform;
+
+import java.io.IOException;
 
 
 //======================================================================
@@ -19,6 +22,11 @@ public class SLC extends AppThread {
     private MBox touchDisplayMBox;
     private MBox octopusCardReaderMBox;
     private MBox lockerMBox;
+
+    private String accessCode;
+    private int pickUpTime;
+    private double amount = 0;
+    private String octopusCardNo;
 
     private Screen screen;
     MouseClickHandler mouseClickHandler;
@@ -83,6 +91,31 @@ public class SLC extends AppThread {
         return newService;
     }
 
+    public String verifyAccessCode(String code) {
+        //verify the received access code from the checkin package's hash map
+        //if access code valid
+        accessCode = code;
+                    /*
+                    pickUpTime = (int) (System.currentTimeMillis() / 1000L);
+                    int storedDuration = pickUpTime - (checkinTime);
+                    int late = 86400;
+                    while(storedDuration > late) {
+                        amount += 20;
+                        late += 86400;
+                    }
+
+                    if(amount == 0) {
+                        //lockerMBox.send(new Msg(id, mbox, Msg.Type.LK_Unlock, <corresponding slot id>));
+                    }else {
+                        octopusCardReaderMBox.send(new Msg(id, mbox, Msg.Type.OCR_GoActive, Double.toString(amount)));
+                    }
+
+                    return Double.toString(amount);
+                     */
+        //else
+        return "false";
+    }
+
     public MouseClickHandler getMouseClickHandler() {
         return mouseClickHandler;
     }
@@ -143,8 +176,10 @@ public class SLC extends AppThread {
                     break;
 
                 case OCR_CardRead:
-                    log.info("Octopus Card " + msg.getDetails() + " is charged");
+                    octopusCardNo = msg.getDetails();
+                    log.info("Octopus Card " + octopusCardNo + " is charged");
                     octopusCardReaderMBox.send(new Msg(id, mbox, Msg.Type.OCR_Charged, ""));
+                    //lockerMBox.send(new Msg(id, mbox, Msg.Type.LK_Unlock, <corresponding slot id>));
                     break;
 
                 case OCR_GoActive:
@@ -180,6 +215,18 @@ public class SLC extends AppThread {
                 case BR_BarcodeRead:
                     log.info("[" + msg.getSender() + "(Received Barcode): " + msg.getDetails() + "]");
                     break;
+
+                case LK_Locked:
+                    CheckOutDto checkOut = new CheckOutDto(accessCode, octopusCardNo, amount, pickUpTime);
+                    try {
+                        currentService.onMessage(new Msg(id, mbox, Msg.Type.SVR_CheckOut, checkOut.toBase64()));
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                    //**delete this access code's key value pair from the hash map
+
+                    break;
+
                 case SVR_ReserveRequest:
                 case SVR_BarcodeVerified:
                 case SVR_HealthPollRequest:
