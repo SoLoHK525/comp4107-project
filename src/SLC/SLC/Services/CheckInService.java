@@ -24,7 +24,7 @@ import javafx.application.Platform;
 
 public class CheckInService extends Service {
     //CONFIG PARAMS
-    int maxRecallAllowed = 3;
+    int maxRecallAllowed;
     int serviceTimeout;
 
     //STATE
@@ -39,6 +39,7 @@ public class CheckInService extends Service {
     public CheckInService(SLC instance) {
         super(instance);
         serviceTimeout = Integer.parseInt(slc.GetProperty("Service.TimeOut"));
+        maxRecallAllowed = Integer.parseInt(slc.GetProperty("Service.MaxHWRecall"));
 
         curBarcode = "";
         HWRecallTimerID = -1;
@@ -171,7 +172,7 @@ public class CheckInService extends Service {
             slc.setScreenText("body", msgContent);
         });
     }
-    
+
     private void displayTakePackageMessage(String slotID) {
         slc.setScreen(Screen.Text);
 
@@ -211,7 +212,7 @@ public class CheckInService extends Service {
 
     private void WaitForRecall(MBox mBox, Msg msg) {
         curRecallingHW = new RecallingHW(mBox, msg);
-        HWRecallTimerID = Timer.setTimer("hw-recaller", slc.getMBox(), 3000);
+        HWRecallTimerID = Timer.setTimer("hw-recaller", slc.getMBox(), Integer.parseInt(slc.GetProperty("Service.HWRecallInterval")));
     }
 
     private void Recall() {
