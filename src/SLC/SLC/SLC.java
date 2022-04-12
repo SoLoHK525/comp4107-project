@@ -35,6 +35,7 @@ import java.io.IOException;
 // SLC
 public class SLC extends AppThread {
     private int pollingTime;
+    private int responseTime;
     private MBox barcodeReaderMBox;
     private MBox touchDisplayMBox;
     private MBox octopusCardReaderMBox;
@@ -179,6 +180,7 @@ public class SLC extends AppThread {
                             octopusCardReaderMBox.send(new Msg(id, mbox, Msg.Type.Poll, ""));
                         if (!diagnosticService.isLKShutDown())
                             lockerMBox.send(new Msg(id, mbox, Msg.Type.Poll, ""));
+                        diagnosticService.setResponseTimer();
                         diagnosticService.lastUpdate = (int) (System.currentTimeMillis() / 1000L);
                     }
                     break;
@@ -411,6 +413,14 @@ public class SLC extends AppThread {
 
     public String GetProperty(String propertyName) {
        return this.appKickstarter.getProperty(propertyName);
+    }
+    
+    public int getResponseTime(){
+        return Integer.parseInt(this.appKickstarter.getProperty("SLC.ResponseTime"));
+    }
+
+    public void setCheckInPackage(String accessCode, Locker locker) {
+       this.checkInPackage.put(accessCode, locker.getSlotId());
     }
     //Getters
 
