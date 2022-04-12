@@ -42,7 +42,9 @@ public class SLC extends AppThread {
     private MBox serverMBox;
     private ArrayList<Locker> lockers;
     private Service currentService;
-    private HashMap<String, Locker> checkInPackage;
+
+    // Map access code to locker's slot id
+    private HashMap<String, String> checkInPackage;
 
     private int slcTimerID;
 
@@ -56,7 +58,6 @@ public class SLC extends AppThread {
     public SLC(String id, AppKickstarter appKickstarter) throws Exception {
         super(id, appKickstarter);
         pollingTime = Integer.parseInt(appKickstarter.getProperty("SLC.PollingTime"));
-        this.loadState();
     } // SLC
 
     public void setOnScreenLoaded(Runnable e) {
@@ -143,6 +144,7 @@ public class SLC extends AppThread {
 
         lockers = initLockers();
         checkInPackage = new HashMap<>();
+        this.loadState();
 
         /**
          * Services
@@ -288,6 +290,7 @@ public class SLC extends AppThread {
                     res.hasLocker = true;
                     res.reservedLocker = locker.toDto();
                     getServerMBox().send(GenerateMsg(Msg.Type.SVR_ReservedResponse, res.toBase64()));
+                    this.saveState();
                     return;
                 }
             }
@@ -305,20 +308,16 @@ public class SLC extends AppThread {
             SLCStateDto dto = new SLCStateDto();
 
             ArrayList<LockerDto> serializableLockers = new ArrayList<>();
-            HashMap<String, LockerDto> serializableCheckInPackage = new HashMap<>();
-
-            for (Map.Entry<String, Locker> entry : checkInPackage.entrySet()) {
-                serializableCheckInPackage.put(entry.getKey(), entry.getValue().toDto());
-            }
 
             for(Locker locker : lockers) {
                 serializableLockers.add(locker.toDto());
             }
 
             dto.lockers = serializableLockers;
-            dto.checkInPackage = serializableCheckInPackage;
+            dto.checkInPackage = this.checkInPackage;
 
             dto.save(stateFile);
+            this.log.info(this.id + ": saved SLC state");
         } catch (IOException exception) {
             this.log.warning(this.id + ": error occurred while saving SLC state: " + exception.getMessage());
         }
@@ -331,13 +330,16 @@ public class SLC extends AppThread {
             if(stateFile.exists()) {
                 SLCStateDto dto = SLCStateDto.from(stateFile);
 
+                if(dto.lockers.size() > 0) {
+                    this.lockers = new ArrayList<>();
+                }
+
                 for(LockerDto locker : dto.lockers) {
                     lockers.add(Locker.fromDto(locker));
                 }
 
-                for(Map.Entry<String, LockerDto> entry : dto.checkInPackage.entrySet()) {
-                    checkInPackage.put(entry.getKey(), Locker.fromDto(entry.getValue()));
-                }
+                this.checkInPackage = dto.checkInPackage;
+                this.log.info(this.id + ": loaded SLC state");
             }
         } catch (IOException | ClassNotFoundException e) {
             this.log.warning(this.id + ": Failed to load state from SLCState.bin, error: " + e.getMessage());
@@ -403,12 +405,23 @@ public class SLC extends AppThread {
         return octopusCardReaderMBox;
     }
 
-    public HashMap<String, Locker> getCheckInPackage() {
+    public Locker getLockerBySlotId(String slotId) {
+        for(Locker locker : lockers) {
+            if(locker.getSlotId().equals(slotId)) {
+                return locker;
+            }
+        }
+
+        return null;
+    }
+
+    public HashMap<String, String> getCheckInPackage() {
         return checkInPackage;
     }
 
-    public void setCheckInPackage(String accessCode, Locker locker) {
-       this.checkInPackage.put(accessCode, locker);
+    public void setCheckInPackage(String accessCode, String lockerSlotId) {
+       this.checkInPackage.put(accessCode, lockerSlotId);
+       this.saveState();
     }
     //Getters
 

@@ -4,6 +4,7 @@ import AppKickstarter.misc.Msg;
 import SLC.SLC.DataStore.Dto.CheckIn.*;
 import SLC.SLC.DataStore.Dto.CheckOut.CheckOutDto;
 import SLC.SLC.DataStore.Dto.Common.LockerDto;
+import SLC.SLC.DataStore.Dto.Server.ServerStateDto;
 import SLC.SLC.DataStore.Interface.LockerSize;
 import SLC.SLCStarter;
 import SLC.ServerDriver.ServerDriver;
@@ -15,6 +16,7 @@ import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import javafx.stage.WindowEvent;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Random;
@@ -26,15 +28,16 @@ public class ServerEmulator extends ServerDriver {
     private ServerEmulatorController serverEmulatorController;
 
     // Key: Barcode, Value: Locker
-    private final HashMap<String, LockerDto> barcodeToLockerMap = new HashMap<>();
+    private HashMap<String, LockerDto> barcodeToLockerMap = new HashMap<>();
 
     // Key: access code Value: barcode
-    private final HashMap<String, String> accessCodeToBarcodeMap = new HashMap<>();
+    private HashMap<String, String> accessCodeToBarcodeMap = new HashMap<>();
 
     public ServerEmulator(String id, SLCStarter slcStarter) {
         super(id, slcStarter);
         this.slcStarter = slcStarter;
         this.id = id;
+        this.loadState();
     }
 
     public void start() throws Exception {
@@ -58,6 +61,9 @@ public class ServerEmulator extends ServerDriver {
             Platform.exit();
         });
         stage.show();
+
+        this.updateAccessCodeToLockerTextArea();
+        this.updateOrderTextArea();
     }
 
     public void addOrder() {
@@ -89,6 +95,7 @@ public class ServerEmulator extends ServerDriver {
                 // when locker is reserved
                 this.barcodeToLockerMap.put(response.barcode, response.reservedLocker);
                 this.updateOrderTextArea();
+                this.saveState();
             }else{
                 this.log.warning(id + ": Failed to reserve locker");
             }
@@ -133,6 +140,7 @@ public class ServerEmulator extends ServerDriver {
             CheckInDto dto = CheckInDto.from(payload);
             this.accessCodeToBarcodeMap.put(dto.access_code, dto.barcode);
             this.updateAccessCodeToLockerTextArea();
+            this.saveState();
         } catch (IOException | ClassNotFoundException e) {
             e.printStackTrace();
         }
@@ -143,9 +151,12 @@ public class ServerEmulator extends ServerDriver {
     protected void handleCheckOut(String payload) {
         try {
             CheckOutDto dto = CheckOutDto.from(payload);
-            
-            log.info("Checkout: " + dto.access_code);
 
+            String barcode = this.accessCodeToBarcodeMap.remove(dto.access_code);
+            this.barcodeToLockerMap.remove(barcode);
+            this.updateAccessCodeToLockerTextArea();
+            this.updateOrderTextArea();
+            this.saveState();
         } catch (IOException | ClassNotFoundException e) {
             e.printStackTrace();
         }
@@ -199,5 +210,37 @@ public class ServerEmulator extends ServerDriver {
         }
 
         this.serverEmulatorController.accessCodeToLockerTextArea.setText(buffer.toString());
+    }
+
+    private void loadState() {
+        try {
+            File stateFile = new File("ServerState.bin");
+
+            if(stateFile.exists()) {
+                ServerStateDto dto = ServerStateDto.from(stateFile);
+                this.accessCodeToBarcodeMap = dto.accessCodeToBarcodeMap;
+                this.barcodeToLockerMap = dto.barcodeToLockerMap;
+            }else{
+                this.log.warning(this.id + ": server state file not present");
+            }
+        } catch (IOException | ClassNotFoundException exception) {
+            this.log.warning(this.id + ": error while trying to parse server state");
+        }
+    }
+
+    @Override
+    protected void saveState() {
+        try {
+            File stateFile = new File("ServerState.bin");
+
+            ServerStateDto dto = new ServerStateDto();
+            dto.accessCodeToBarcodeMap = accessCodeToBarcodeMap;
+            dto.barcodeToLockerMap = barcodeToLockerMap;
+
+            dto.save(stateFile);
+            this.log.info(this.id + ": Saved server state");
+        } catch (IOException exception) {
+            this.log.warning(this.id + ": error while trying to parse server state");
+        }
     }
 }

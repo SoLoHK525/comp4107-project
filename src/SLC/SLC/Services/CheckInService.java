@@ -167,7 +167,7 @@ public class CheckInService extends Service {
 
         for (Locker locker : slc.getLockers()) {
             if (Objects.equals(locker.getSlotId(), slotID)) {
-                slc.setCheckInPackage(dto.access_code, locker);
+                slc.setCheckInPackage(dto.access_code, slotID);
                 break;
             }
         }

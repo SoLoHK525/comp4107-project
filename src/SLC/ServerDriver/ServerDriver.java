@@ -7,7 +7,6 @@ import SLC.HWHandler.HWHandler;
 import java.io.IOException;
 
 public class ServerDriver extends HWHandler {
-
     public ServerDriver(String id, AppKickstarter appKickstarter) {
         super(id, appKickstarter);
     }
@@ -32,9 +31,16 @@ public class ServerDriver extends HWHandler {
             case SVR_HealthPollResponse:
                 this.handleHealthPollResponse(payload);
                 break;
+            case Terminate:
+                this.saveState();
+                break;
             default:
                 log.warning(id + ": unknown message type: [" + msg + "]");
         }
+    }
+
+    protected void saveState() {
+
     }
 
     protected void handleReservedResponse(String payload) {

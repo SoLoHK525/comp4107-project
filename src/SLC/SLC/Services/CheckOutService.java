@@ -87,15 +87,14 @@ public class CheckOutService extends Service {
 
     private Locker getLockerByAccessCode(String code) {
         //verify the received access code from the hash map "checkInPackage"
-        HashMap<String, Locker> checkInPackage = slc.getCheckInPackage();
+        HashMap<String, String> checkInPackage = slc.getCheckInPackage();
+        String slotId = checkInPackage.get(code);
 
-        return checkInPackage.get(code);
+        return slc.getLockerBySlotId(slotId);
     }
 
     private double calculateFine(String code) {
-        HashMap<String, Locker> checkInPackage = slc.getCheckInPackage();
-
-        Locker locker = checkInPackage.get(code);
+        Locker locker = this.getLockerByAccessCode(code);
 
         accessCode = code;
         pickUpTime = (int) (System.currentTimeMillis() / 1000L);
@@ -106,8 +105,6 @@ public class CheckOutService extends Service {
             amount += 20;   //charge $20 for each 24hr
             late += 86400;
         }
-
-        amount += 0.5; // TODO: Remove debug variables
 
         return amount;
     }
@@ -154,7 +151,7 @@ public class CheckOutService extends Service {
     }
 
     private void onPackageTaken() {
-        HashMap<String, Locker> checkInPackage = slc.getCheckInPackage();
+        HashMap<String, String> checkInPackage = slc.getCheckInPackage();
 
         CheckOutDto checkOut = new CheckOutDto(accessCode, octopusCardNo, amount, pickUpTime);
         try {
