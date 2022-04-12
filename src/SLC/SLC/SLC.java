@@ -42,6 +42,7 @@ public class SLC extends AppThread {
     private MBox serverMBox;
     private ArrayList<Locker> lockers;
     private Service currentService;
+    private DiagnosticService diagnosticService;
 
     // Map access code to locker's slot id
     private HashMap<String, String> checkInPackage;
@@ -133,7 +134,7 @@ public class SLC extends AppThread {
     //------------------------------------------------------------
     // run
     public void run() {
-        slcTimerID = Timer.setTimer(id, mbox, pollingTime);
+        int pollingTimerID = Timer.setTimer(id, mbox, pollingTime);
         log.info(id + ": starting...");
 
         barcodeReaderMBox = appKickstarter.getThread("BarcodeReaderDriver").getMBox();
@@ -151,7 +152,7 @@ public class SLC extends AppThread {
          */
         currentService = null; // checkin / checkout;
         this.setService(UserService.SelectScreen); // select / checkin / checkout;
-        DiagnosticService diagnosticService = new DiagnosticService(this);
+        diagnosticService = new DiagnosticService(this);
 
         for (boolean quit = false; !quit; ) {
             Msg msg = mbox.receive();
@@ -171,20 +172,24 @@ public class SLC extends AppThread {
                     log.info("LK_Status: " + msg.getDetails());
                     break;
 
-
                 case TimesUp:
-                    if(Timer.getTimesUpMsgTimerId(msg) == slcTimerID) {
-                        slcTimerID = Timer.setTimer(id, mbox, pollingTime);
+                    if (Timer.getTimesUpMsgTimerId(msg) == pollingTimerID) {
+                        pollingTimerID = Timer.setTimer(id, mbox, pollingTime);
                         log.info("Poll: " + msg.getDetails());
-                        barcodeReaderMBox.send(new Msg(id, mbox, Msg.Type.Poll, ""));
-                        touchDisplayMBox.send(new Msg(id, mbox, Msg.Type.Poll, ""));
-                        octopusCardReaderMBox.send(new Msg(id, mbox, Msg.Type.Poll, ""));
-                        lockerMBox.send(new Msg(id, mbox, Msg.Type.Poll, ""));
+                        if (!diagnosticService.isBRShutDown())
+                            barcodeReaderMBox.send(new Msg(id, mbox, Msg.Type.Poll, ""));
+                        if (!diagnosticService.isTSShutDown())
+                            touchDisplayMBox.send(new Msg(id, mbox, Msg.Type.Poll, ""));
+                        if (!diagnosticService.isORRShutDown())
+                            octopusCardReaderMBox.send(new Msg(id, mbox, Msg.Type.Poll, ""));
+                        if (!diagnosticService.isLKShutDown())
+                            lockerMBox.send(new Msg(id, mbox, Msg.Type.Poll, ""));
+                        diagnosticService.lastUpdate = (int) (System.currentTimeMillis() / 1000L);
                     }
                     break;
 
                 case PollAck:
-                    log.info("PollAck: " + msg.getDetails());
+                case PollNak:
                     break;
 
                 case OCR_CardRead:
@@ -221,12 +226,10 @@ public class SLC extends AppThread {
                     break;
 
                 case LK_Locked:
-
                     break;
 
                 case SVR_BarcodeVerified:
                 case SVR_HealthPollRequest:
-                    diagnosticService.onMessage(msg);
                     break;
                 default:
                     log.warning(id + ": unknown message type: [" + msg + "]");
@@ -419,9 +422,17 @@ public class SLC extends AppThread {
         return checkInPackage;
     }
 
+    public DiagnosticService getDiagnosticService(){
+        return diagnosticService;
+    }
+
     public void setCheckInPackage(String accessCode, String lockerSlotId) {
        this.checkInPackage.put(accessCode, lockerSlotId);
        this.saveState();
+    }
+
+    public String GetProperty(String propertyName) {
+       return this.appKickstarter.getProperty(propertyName);
     }
     //Getters
 

@@ -24,7 +24,8 @@ import javafx.application.Platform;
 
 public class CheckInService extends Service {
     //CONFIG PARAMS
-    int maxRecallAllowed = 3;
+    int maxRecallAllowed;
+    int serviceTimeout;
 
     //STATE
     String curBarcode;
@@ -33,11 +34,13 @@ public class CheckInService extends Service {
     RecallingHW curRecallingHW;
     int recalledCount;
 
-    //REF
-    MBox serverMBox;
+    int EndServiceTimerID;
 
     public CheckInService(SLC instance) {
         super(instance);
+        serviceTimeout = Integer.parseInt(slc.GetProperty("Service.TimeOut"));
+        maxRecallAllowed = Integer.parseInt(slc.GetProperty("Service.MaxHWRecall"));
+
         curBarcode = "";
         HWRecallTimerID = -1;
         recalledCount = 0;
@@ -47,7 +50,7 @@ public class CheckInService extends Service {
         slc.setScreen(Screen.Text);
 
         System.out.println("Running check in service");
-        Timer.setTimer("check-in", slc.getMBox(), 1000);
+       UpdateTimeoutTimer(serviceTimeout);
 
         slc.setOnScreenLoaded(() -> {
             slc.setScreenText("title", "Welcome!");
@@ -55,7 +58,6 @@ public class CheckInService extends Service {
             slc.setScreenText("body", "Scan a barcode to checkin your delivery ticket.");
         });
 
-        serverMBox = slc.getServerMBox();
         MBox barcodeReaderMBox = slc.getBarcodeReaderMBox();
         barcodeReaderMBox.send(slc.GenerateMsg(Msg.Type.BR_GoActive, ""));
     }
@@ -67,12 +69,17 @@ public class CheckInService extends Service {
                 case TimesUp:
                     if (Timer.getTimesUpMsgTimerId(message) == HWRecallTimerID) {
                         Recall();
+                    }else if(Timer.getTimesUpMsgTimerId(message) == EndServiceTimerID) {
+                        slc.EndService();
                     }
                     break;
                 case Error:
                 case BR_ReturnStandby:
-                    this.displaySuccessMessage();
-                    // slc.EndService();
+                    if(!curBarcode.equals("")) {
+                        this.displaySuccessMessage();
+                    } else {
+                        this.displayInactiveMessage("Inactive Barcode reader", "Come back later");
+                    }
                     break;
                 case BR_ReturnActive:
                     if (!curBarcode.equals("")) {
@@ -84,6 +91,7 @@ public class CheckInService extends Service {
                     }
                     break;
                 case BR_BarcodeRead:
+                    UpdateTimeoutTimer(serviceTimeout);
                     SendBarcodeToServer(message);
                     break;
                 case SVR_BarcodeVerified:
@@ -97,6 +105,7 @@ public class CheckInService extends Service {
                     }
                     break;
                 case LK_Locked:
+                    UpdateTimeoutTimer(serviceTimeout);
                     PerformCheckIn();
                     slc.getBarcodeReaderMBox().send(slc.GenerateMsg(Msg.Type.BR_GoStandby, ""));
                     break;
@@ -105,6 +114,11 @@ public class CheckInService extends Service {
             System.out.println(e);
             e.printStackTrace();
         }
+    }
+
+    private void UpdateTimeoutTimer(int sleepTime) {
+        Timer.cancelTimer("end-service", slc.getMBox(), EndServiceTimerID);
+        EndServiceTimerID = Timer.setTimer("end-service", slc.getMBox(), sleepTime);
     }
 
     private void displayInvalidBarcodeError() {
@@ -149,6 +163,16 @@ public class CheckInService extends Service {
         });
     }
 
+    private void displayInactiveMessage(String subtitle, String msgContent) {
+       UpdateTimeoutTimer(Integer.parseInt(slc.GetProperty("Service.MsgScreenDuration")));
+        slc.setScreen(Screen.Text);
+        slc.setOnScreenLoaded(() -> {
+            slc.setScreenText("title", "Yikes!");
+            slc.setScreenText("subtitle", subtitle);
+            slc.setScreenText("body", msgContent);
+        });
+    }
+
     private void displayTakePackageMessage(String slotID) {
         slc.setScreen(Screen.Text);
 
@@ -172,7 +196,7 @@ public class CheckInService extends Service {
             }
         }
 
-        serverMBox.send(slc.GenerateMsg(Msg.Type.SVR_CheckIn, dto.toBase64()));
+        slc.getServerMBox().send(slc.GenerateMsg(Msg.Type.SVR_CheckIn, dto.toBase64()));
     }
 
     private String GenAccessCode() {
@@ -188,7 +212,7 @@ public class CheckInService extends Service {
 
     private void WaitForRecall(MBox mBox, Msg msg) {
         curRecallingHW = new RecallingHW(mBox, msg);
-        HWRecallTimerID = Timer.setTimer("hw-recaller", slc.getMBox(), 3000);
+        HWRecallTimerID = Timer.setTimer("hw-recaller", slc.getMBox(), Integer.parseInt(slc.GetProperty("Service.HWRecallInterval")));
     }
 
     private void Recall() {
