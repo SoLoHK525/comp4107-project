@@ -39,6 +39,7 @@ public class SLC extends AppThread {
     private ArrayList<Locker> lockers;
     private Service currentService;
     private HashMap<String, Locker> checkInPackage;
+    private DiagnosticService diagnosticService;
 
     private String accessCode;
     private int pickUpTime;
@@ -147,7 +148,7 @@ public class SLC extends AppThread {
          */
         currentService = null; // checkin / checkout;
         this.setService(UserService.SelectScreen); // select / checkin / checkout;
-        DiagnosticService diagnosticService = new DiagnosticService(this);
+        diagnosticService = new DiagnosticService(this);
 
         for (boolean quit = false; !quit; ) {
             Msg msg = mbox.receive();
@@ -166,7 +167,6 @@ public class SLC extends AppThread {
                 case LK_ReturnStatus:
                     log.info("LK_Status: " + msg.getDetails());
                     break;
-
 
                 case TimesUp:
                     if (Timer.getTimesUpMsgTimerId(msg) == pollingTimerID) {
@@ -221,7 +221,6 @@ public class SLC extends AppThread {
                     break;
 
                 case LK_Locked:
-
                     break;
 
                 case SVR_BarcodeVerified:
@@ -362,6 +361,10 @@ public class SLC extends AppThread {
 
     public HashMap<String, Locker> getCheckInPackage() {
         return checkInPackage;
+    }
+
+    public DiagnosticService getDiagnosticService(){
+        return diagnosticService;
     }
 
     public void setCheckInPackage(String accessCode, Locker locker) {
