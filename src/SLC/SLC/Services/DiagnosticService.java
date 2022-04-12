@@ -3,7 +3,11 @@ package SLC.SLC.Services;
 import AppKickstarter.misc.Msg;
 import SLC.SLC.DataStore.Dto.Diagnostic.HealthPoolDto;
 import SLC.SLC.DataStore.Interface.Locker;
+import SLC.SLC.Handlers.MouseClick.MainMenuMouseClickHandler;
+import SLC.SLC.Handlers.MouseClick.MouseClickHandler;
 import SLC.SLC.SLC;
+import SLC.SLC.Screen;
+import SLC.SLC.UserService;
 
 import java.io.File;
 import java.io.IOException;
@@ -153,7 +157,7 @@ public class DiagnosticService extends Service {
             healthPoolDto.lastUpdate = this.lastUpdate;
             String healthPoll = healthPoolDto.toBase64();
             healthPoolDto.lockers = slc.getLockers();
-            //serverMBox.send(new Msg(slc.getID(), slc.getMBox(), Msg.Type.SVR_HealthPollResponse, healthPoll));
+            slc.getServerMBox().send(new Msg(slc.getID(), slc.getMBox(), Msg.Type.SVR_HealthPollResponse, healthPoll));
         }catch(IOException e){
             System.out.println(e); //Exception Handling
         }
@@ -161,6 +165,7 @@ public class DiagnosticService extends Service {
 
     public void showSystemStatus(){
         ArrayList<Locker> lockers = slc.getLockers();
+        HashMap<String, Locker> lockerMap = slc.getCheckInPackage();
         Date date = new Date(System.currentTimeMillis());
         SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy.MM.dd G 'at' HH:mm:ss z");
         String formatted = dateFormatter.format(date);
@@ -173,15 +178,28 @@ public class DiagnosticService extends Service {
                          "  --Locker:               " + isLKShutDown() + "\n");
         System.out.println("Locker Slot: {");
 
-        for (Locker lockerSlot : lockers){
-            System.out.println("[ID:" + lockerSlot.getSlotId() + ",");
-            System.out.println("    Locked:" + lockerSlot.getLocked() + ",");
-            System.out.println("    Contain Package:" + lockerSlot.getContainPackage() + ",");
-            System.out.println("    Reserved:" + lockerSlot.getReserved() + ",");
-            System.out.println("    Last Updated:" + lockerSlot.getLastUpdate() + ",");
-            System.out.println("    Access Code:" + "]"); //TODO: Access Code of the locker
+        for (Locker lockerSlot : lockers) {
+                System.out.println("[ID:" + lockerSlot.getSlotId() + ",");
+                System.out.println("    Locked:" + lockerSlot.getLocked() + ",");
+                System.out.println("    Contain Package:" + lockerSlot.getContainPackage() + ",");
+                System.out.println("    Reserved:" + lockerSlot.getReserved() + ",");
+                System.out.println("    Last Updated:" + lockerSlot.getLastUpdate() + ",");
+                //System.out.println("    Access Code:" +  + "]"); //TODO: GET ACCESS CODE!!!
         }
+
         System.out.println("}");
         System.out.println("------------------------------End of Report-----------------------------");
     }
+
+/*    public void displayHWFailure(String module){
+        slc.setScreen(Screen.Text);
+        slc.setOnScreenLoaded(() -> {
+            slc.setOnScreenLoaded(() -> {
+                slc.setScreenText("title", "Hardware Failure");
+                slc.setScreenText("subtitle", module + " is down. Please contact the Smart Locker Company.");
+                slc.setScreenText("body", "");
+            });
+        });
+    }*/
+
 }
