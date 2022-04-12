@@ -5,6 +5,8 @@ import AppKickstarter.misc.*;
 import AppKickstarter.timer.Timer;
 import SLC.SLC.DataStore.Dto.CheckIn.ReservationRequestDto;
 import SLC.SLC.DataStore.Dto.CheckIn.ReservedResponseDto;
+import SLC.SLC.DataStore.Dto.Common.LockerDto;
+import SLC.SLC.DataStore.Dto.SLC.SLCStateDto;
 import SLC.SLC.DataStore.Interface.Locker;
 import SLC.SLC.DataStore.Interface.LockerSize;
 import SLC.SLC.DataStore.SerializableDto;
@@ -15,9 +17,11 @@ import SLC.SLC.Services.CheckInService;
 import SLC.SLC.Services.DiagnosticService;
 import SLC.SLC.Services.Service;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.logging.Logger;
 import SLC.SLC.Handlers.MouseClick.ConfirmationMouseClickHandler;
 import SLC.SLC.Handlers.MouseClick.PasscodeMouseClickHandler;
@@ -35,18 +39,20 @@ public class SLC extends AppThread {
     private MBox touchDisplayMBox;
     private MBox octopusCardReaderMBox;
     private MBox lockerMBox;
+    private MBox serverMBox;
     private ArrayList<Locker> lockers;
     private Service currentService;
-    private HashMap<String, Locker> checkInPackage;
+    private DiagnosticService diagnosticService;
 
-    private String accessCode;
-    private int pickUpTime;
-    private double amount = 0;
-    private String octopusCardNo;
+    // Map access code to locker's slot id
+    private HashMap<String, String> checkInPackage;
+
+    private int slcTimerID;
 
     private Screen screen;
     MouseClickHandler mouseClickHandler;
 
+    private Runnable onScreenLoaded;
 
     //------------------------------------------------------------
     // SLC
@@ -54,6 +60,10 @@ public class SLC extends AppThread {
         super(id, appKickstarter);
         pollingTime = Integer.parseInt(appKickstarter.getProperty("SLC.PollingTime"));
     } // SLC
+
+    public void setOnScreenLoaded(Runnable e) {
+        this.onScreenLoaded = e;
+    }
 
     public void setScreen(Screen screen) {
         this.screen = screen;
@@ -66,6 +76,7 @@ public class SLC extends AppThread {
             case Confirmation:
                 touchDisplayMBox.send(new Msg(id, touchDisplayMBox, Msg.Type.TD_UpdateDisplay, "Confirmation"));
                 mouseClickHandler = new ConfirmationMouseClickHandler();
+                break;
             case Passcode:
                 touchDisplayMBox.send(new Msg(id, touchDisplayMBox, Msg.Type.TD_UpdateDisplay, "Passcode"));
                 mouseClickHandler = new PasscodeMouseClickHandler();
@@ -101,35 +112,13 @@ public class SLC extends AppThread {
                 throw new IllegalStateException("Unexpected value: " + service);
         }
 
+        this.log.info(id + ": switching to service: " + service.name());
+
         this.currentService = newService;
 
         return newService;
     }
 
-    public String verifyAccessCode(String code) {
-        //verify the received access code from the checkin package's hash map
-        //if access code valid
-        accessCode = code;
-                    /*
-                    pickUpTime = (int) (System.currentTimeMillis() / 1000L);
-                    int storedDuration = pickUpTime - (checkinTime);
-                    int late = 86400;
-                    while(storedDuration > late) {
-                        amount += 20;
-                        late += 86400;
-                    }
-
-                    if(amount == 0) {
-                        //lockerMBox.send(new Msg(id, mbox, Msg.Type.LK_Unlock, <corresponding slot id>));
-                    }else {
-                        octopusCardReaderMBox.send(new Msg(id, mbox, Msg.Type.OCR_GoActive, Double.toString(amount)));
-                    }
-
-                    return Double.toString(amount);
-                     */
-        //else
-        return "false";
-    }
 
     public MouseClickHandler getMouseClickHandler() {
         return mouseClickHandler;
@@ -145,23 +134,25 @@ public class SLC extends AppThread {
     //------------------------------------------------------------
     // run
     public void run() {
-        Timer.setTimer(id, mbox, pollingTime);
+        int pollingTimerID = Timer.setTimer(id, mbox, pollingTime);
         log.info(id + ": starting...");
 
         barcodeReaderMBox = appKickstarter.getThread("BarcodeReaderDriver").getMBox();
         touchDisplayMBox = appKickstarter.getThread("TouchDisplayHandler").getMBox();
         octopusCardReaderMBox = appKickstarter.getThread("OctopusCardReaderDriver").getMBox();
         lockerMBox = appKickstarter.getThread("Locker").getMBox();
+        serverMBox = appKickstarter.getThread("ServerDriver").getMBox();
 
         lockers = initLockers();
         checkInPackage = new HashMap<>();
+        this.loadState();
 
         /**
          * Services
          */
         currentService = null; // checkin / checkout;
         this.setService(UserService.SelectScreen); // select / checkin / checkout;
-        DiagnosticService diagnosticService = new DiagnosticService(this);
+        diagnosticService = new DiagnosticService(this);
 
         for (boolean quit = false; !quit; ) {
             Msg msg = mbox.receive();
@@ -174,26 +165,35 @@ public class SLC extends AppThread {
                     processMouseClicked(msg);
                     break;
 
+                case TD_ScreenLoaded:
+                    handleScreenLoaded();
+                    break;
                 case LK_ReturnStatus:
                     log.info("LK_Status: " + msg.getDetails());
                     break;
 
-
                 case TimesUp:
-                    Timer.setTimer(id, mbox, pollingTime);
-                    log.info("Poll: " + msg.getDetails());
-                    barcodeReaderMBox.send(new Msg(id, mbox, Msg.Type.Poll, ""));
-                    touchDisplayMBox.send(new Msg(id, mbox, Msg.Type.Poll, ""));
-                    octopusCardReaderMBox.send(new Msg(id, mbox, Msg.Type.Poll, ""));
-                    lockerMBox.send(new Msg(id, mbox, Msg.Type.Poll, ""));
+                    if (Timer.getTimesUpMsgTimerId(msg) == pollingTimerID) {
+                        pollingTimerID = Timer.setTimer(id, mbox, pollingTime);
+                        log.info("Poll: " + msg.getDetails());
+                        if (!diagnosticService.isBRShutDown())
+                            barcodeReaderMBox.send(new Msg(id, mbox, Msg.Type.Poll, ""));
+                        if (!diagnosticService.isTSShutDown())
+                            touchDisplayMBox.send(new Msg(id, mbox, Msg.Type.Poll, ""));
+                        if (!diagnosticService.isORRShutDown())
+                            octopusCardReaderMBox.send(new Msg(id, mbox, Msg.Type.Poll, ""));
+                        if (!diagnosticService.isLKShutDown())
+                            lockerMBox.send(new Msg(id, mbox, Msg.Type.Poll, ""));
+                        diagnosticService.lastUpdate = (int) (System.currentTimeMillis() / 1000L);
+                    }
                     break;
 
                 case PollAck:
-                    log.info("PollAck: " + msg.getDetails());
+                case PollNak:
                     break;
 
                 case OCR_CardRead:
-                    octopusCardNo = msg.getDetails();
+                    String octopusCardNo = msg.getDetails();
                     log.info("Octopus Card " + octopusCardNo + " is charged");
                     octopusCardReaderMBox.send(new Msg(id, mbox, Msg.Type.OCR_Charged, ""));
                     //lockerMBox.send(new Msg(id, mbox, Msg.Type.LK_Unlock, <corresponding slot id>));
@@ -209,24 +209,12 @@ public class SLC extends AppThread {
 
                 case Terminate:
                     quit = true;
+                    this.saveState();
                     break;
 
-                case BR_GoActive:
-                    if (msg.getSender().equals("BarcodeReaderDriver")) {
-                        log.info("Activation Response: " + msg.getDetails());
-                        break;
-                    }
-                    log.info("Activate: " + msg.getDetails());
-                    barcodeReaderMBox.send(new Msg(id, mbox, Msg.Type.BR_GoActive, ""));
-                    break;
-
-                case BR_GoStandby:
-                    if (msg.getSender().equals("BarcodeReaderDriver")) {
-                        log.info("Standby Response: " + msg.getDetails());
-                        break;
-                    }
-                    log.info("Standby: " + msg.getDetails());
-                    barcodeReaderMBox.send(new Msg(id, mbox, Msg.Type.BR_GoStandby, ""));
+                case BR_ReturnActive:
+                case BR_ReturnStandby:
+                    currentService.onMessage(msg);
                     break;
 
                 case SVR_ReserveRequest:
@@ -238,30 +226,19 @@ public class SLC extends AppThread {
                     break;
 
                 case LK_Locked:
-                    CheckOutDto checkOut = new CheckOutDto(accessCode, octopusCardNo, amount, pickUpTime);
-                    try {
-                        currentService.onMessage(new Msg(id, mbox, Msg.Type.SVR_CheckOut, checkOut.toBase64()));
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                    //**delete this access code's key value pair from the hash map
-
                     break;
 
                 case SVR_BarcodeVerified:
                 case SVR_HealthPollRequest:
-                    // add service
-                    if(this.currentService != null) {
-                        this.currentService.onMessage(msg);
-                    }
-                    diagnosticService.onMessage(msg);
                     break;
                 default:
                     log.warning(id + ": unknown message type: [" + msg + "]");
             }
 
-
-            currentService.onMessage(msg);
+            // add service
+            if(this.currentService != null) {
+                this.currentService.onMessage(msg);
+            }
             diagnosticService.onMessage(msg);
         }
 
@@ -269,6 +246,13 @@ public class SLC extends AppThread {
         appKickstarter.unregThread(this);
         log.info(id + ": terminating...");
     } // run
+
+    private void handleScreenLoaded() {
+        if(this.onScreenLoaded != null) {
+            this.onScreenLoaded.run();
+            this.onScreenLoaded = null;
+        }
+    }
 
     //------------------------------------------------------------
     // initLockers
@@ -300,25 +284,70 @@ public class SLC extends AppThread {
     private void HandleReserve(String detail) {
         try {
             ReservationRequestDto msgDetail = SerializableDto.from(detail);
+            ReservedResponseDto res = new ReservedResponseDto();
             for (Locker locker : lockers) {
                 if (locker.getReserved() || locker.getContainPackage()) continue;
                 if (locker.getSize() == msgDetail.lockerSize) {
                     locker.setReserved(true);
-                    ReservedResponseDto res = new ReservedResponseDto();
+                    res.barcode = msgDetail.barcode;
                     res.hasLocker = true;
                     res.reservedLocker = locker.toDto();
-                    String dtoStr = res.toBase64();
-                    getServerMBox().send(GenerateMsg(Msg.Type.SVR_ReservedResponse, dtoStr));
+                    getServerMBox().send(GenerateMsg(Msg.Type.SVR_ReservedResponse, res.toBase64()));
+                    this.saveState();
                     return;
                 }
             }
 
-            getServerMBox().send(GenerateMsg(Msg.Type.SVR_ReservedResponse, ""));
+            getServerMBox().send(GenerateMsg(Msg.Type.SVR_ReservedResponse, res.toBase64()));
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
     //
+
+    private void saveState() {
+        try {
+            File stateFile = new File("SLCState.bin");
+            SLCStateDto dto = new SLCStateDto();
+
+            ArrayList<LockerDto> serializableLockers = new ArrayList<>();
+
+            for(Locker locker : lockers) {
+                serializableLockers.add(locker.toDto());
+            }
+
+            dto.lockers = serializableLockers;
+            dto.checkInPackage = this.checkInPackage;
+
+            dto.save(stateFile);
+            this.log.info(this.id + ": saved SLC state");
+        } catch (IOException exception) {
+            this.log.warning(this.id + ": error occurred while saving SLC state: " + exception.getMessage());
+        }
+    }
+
+    private void loadState() {
+        try {
+            File stateFile = new File("SLCState.bin");
+
+            if(stateFile.exists()) {
+                SLCStateDto dto = SLCStateDto.from(stateFile);
+
+                if(dto.lockers.size() > 0) {
+                    this.lockers = new ArrayList<>();
+                }
+
+                for(LockerDto locker : dto.lockers) {
+                    lockers.add(Locker.fromDto(locker));
+                }
+
+                this.checkInPackage = dto.checkInPackage;
+                this.log.info(this.id + ": loaded SLC state");
+            }
+        } catch (IOException | ClassNotFoundException e) {
+            this.log.warning(this.id + ": Failed to load state from SLCState.bin, error: " + e.getMessage());
+        }
+    }
 
     //------------------------------------------------------------
     // GenerateMsg
@@ -343,8 +372,7 @@ public class SLC extends AppThread {
         // Use different handler according which screen is being displayed
         MouseClickHandler handler = new MainMenuMouseClickHandler();
 
-
-        System.out.println("Button: " + handler.getClickedButtonIndex(x, y));
+        // System.out.println("Button: " + handler.getClickedButtonIndex(x, y));
         handler.handleButtonClick(x, y);
 		// Use different handler according which screen is being displayed
         if(mouseClickHandler != null) {
@@ -365,7 +393,7 @@ public class SLC extends AppThread {
 
     public MBox getServerMBox() {
         //  Temp
-        return this.lockerMBox;
+        return serverMBox;
     }
 
     public MBox getBarcodeReaderMBox() {
@@ -376,8 +404,35 @@ public class SLC extends AppThread {
         return lockerMBox;
     }
 
-    public void setCheckInPackage(String accessCode, Locker locker) {
-       this.checkInPackage.put(accessCode, locker);
+    public MBox getOctopusCardReaderMBox() {
+        return octopusCardReaderMBox;
+    }
+
+    public Locker getLockerBySlotId(String slotId) {
+        for(Locker locker : lockers) {
+            if(locker.getSlotId().equals(slotId)) {
+                return locker;
+            }
+        }
+
+        return null;
+    }
+
+    public HashMap<String, String> getCheckInPackage() {
+        return checkInPackage;
+    }
+
+    public DiagnosticService getDiagnosticService(){
+        return diagnosticService;
+    }
+
+    public void setCheckInPackage(String accessCode, String lockerSlotId) {
+       this.checkInPackage.put(accessCode, lockerSlotId);
+       this.saveState();
+    }
+
+    public String GetProperty(String propertyName) {
+       return this.appKickstarter.getProperty(propertyName);
     }
     //Getters
 

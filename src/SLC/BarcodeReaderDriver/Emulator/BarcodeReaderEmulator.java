@@ -58,11 +58,11 @@ public class BarcodeReaderEmulator extends BarcodeReaderDriver {
     protected void handleGoActive() {
         switch (barcodeReaderEmulatorController.getActivationResp()){
             case "Activated":
-                slc.send(new Msg(id, mbox, Msg.Type.BR_GoActive, "Barcode Reader Activated"));
+                slc.send(new Msg(id, mbox, Msg.Type.BR_ReturnActive, "Barcode Reader Activated"));
                 barcodeReaderEmulatorController.goActive();
                 break;
             case "Standby":
-                slc.send(new Msg(id, mbox, Msg.Type.BR_GoActive, "Barcode Reader Standby"));
+                slc.send(new Msg(id, mbox, Msg.Type.BR_ReturnStandby, "Barcode Reader Standby"));
                 barcodeReaderEmulatorController.goStandby();
                 break;
             case "Ignore":
@@ -78,11 +78,11 @@ public class BarcodeReaderEmulator extends BarcodeReaderDriver {
     protected void handleGoStandby() {
         switch (barcodeReaderEmulatorController.getStandbyResp()){
             case "Activated":
-                slc.send(new Msg(id, mbox, Msg.Type.BR_GoStandby, "Barcode Reader Activated"));
+                slc.send(new Msg(id, mbox, Msg.Type.BR_ReturnActive, "Barcode Reader Activated"));
                 barcodeReaderEmulatorController.goActive();
                 break;
             case "Standby":
-                slc.send(new Msg(id, mbox, Msg.Type.BR_GoStandby, "Barcode Reader Standby"));
+                slc.send(new Msg(id, mbox, Msg.Type.BR_ReturnStandby, "Barcode Reader Standby"));
                 barcodeReaderEmulatorController.goStandby();
                 break;
             case "Ignore":

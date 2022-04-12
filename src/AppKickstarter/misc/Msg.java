@@ -147,6 +147,10 @@ public class Msg {
          */
         TD_MouseClicked,
         /**
+         * Screen Loaded
+         */
+        TD_ScreenLoaded,
+        /**
          * Change Text Label
          */
         TD_ChangeTextLabel,
@@ -158,6 +162,14 @@ public class Msg {
          * Barcode Reader Go Standby
          */
         BR_GoStandby,
+        /**
+         *  Barcode Reader return active
+         */
+        BR_ReturnActive,
+        /**
+         *  Barcode Reader return standby
+         */
+        BR_ReturnStandby,
         /**
          * Card inserted
          */
@@ -226,7 +238,9 @@ public class Msg {
          * Health poll response [SLC]
          */
         SVR_HealthPollResponse,
-
-
+        /**
+         * Hardware offline [SLC]
+         */
+        SVR_HWOffLine,
     } // Type
 } // Msg

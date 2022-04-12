@@ -15,13 +15,13 @@ public class SelectScreenService extends Service {
         slc.setScreen(Screen.MainMenu);
 
         // Run after the controller is loaded by the JavaFX
-        Platform.runLater(() -> {
+        slc.setOnScreenLoaded(() -> {
             slc.setScreenText("button0", "Check In");
             slc.setScreenText("button1", "Check Out");
             slc.setScreenText("button2", "");
             slc.setScreenText("button3", "");
             slc.setScreenText("button4", "");
-            slc.setScreenText("button5", "");
+            slc.setScreenText("button5", "Show System Status");
 
             MouseClickHandler handler = slc.getMouseClickHandler();
 
@@ -31,6 +31,10 @@ public class SelectScreenService extends Service {
 
             handler.onClick(MainMenuMouseClickHandler.Buttons.Button1, () -> {
                 slc.setService(UserService.CheckOut);
+            });
+
+            handler.onClick(MainMenuMouseClickHandler.Buttons.Button5, () -> {
+                slc.getDiagnosticService().showSystemStatus();
             });
         });
     }

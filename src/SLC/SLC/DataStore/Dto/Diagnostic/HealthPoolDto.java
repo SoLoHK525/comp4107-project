@@ -13,5 +13,6 @@ public class HealthPoolDto extends SerializableDto {
     public boolean isTouchScreenOnline;
     public boolean isBarcodeReaderOnline;
     public boolean isLockerControllerOnline;
+    public int lastUpdate;
     public ArrayList<Locker> lockers;
 }
