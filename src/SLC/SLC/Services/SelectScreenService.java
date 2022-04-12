@@ -15,7 +15,7 @@ public class SelectScreenService extends Service {
         slc.setScreen(Screen.MainMenu);
 
         // Run after the controller is loaded by the JavaFX
-        Platform.runLater(() -> {
+        slc.setOnScreenLoaded(() -> {
             slc.setScreenText("button0", "Check In");
             slc.setScreenText("button1", "Check Out");
             slc.setScreenText("button2", "");

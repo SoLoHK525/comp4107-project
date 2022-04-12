@@ -106,7 +106,4 @@ public class OctopusCardReaderEmulator extends OctopusCardReaderDriver {
                 break;
         }
     }
-
-
-
 }

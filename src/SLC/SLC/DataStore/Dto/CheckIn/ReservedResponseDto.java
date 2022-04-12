@@ -8,6 +8,7 @@ import SLC.SLC.DataStore.SerializableDto;
  * SLC response of reserving a locker
  */
 public class ReservedResponseDto extends SerializableDto {
+    public String barcode;
     public boolean hasLocker;
     public LockerDto reservedLocker;
 }
