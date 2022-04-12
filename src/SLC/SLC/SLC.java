@@ -233,7 +233,6 @@ public class SLC extends AppThread {
                     HandleReserve(msg.getDetails());
                     break;
 
-                case LK_Locked:
                 case BR_BarcodeRead:
                     log.info("[" + msg.getSender() + "(Received Barcode): " + msg.getDetails() + "]");
                     break;
@@ -249,7 +248,6 @@ public class SLC extends AppThread {
 
                     break;
 
-                case SVR_ReserveRequest:
                 case SVR_BarcodeVerified:
                 case SVR_HealthPollRequest:
                     // add service
