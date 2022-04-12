@@ -4,6 +4,7 @@ import AppKickstarter.AppKickstarter;
 import AppKickstarter.misc.*;
 import AppKickstarter.timer.Timer;
 import SLC.SLC.DataStore.Dto.CheckIn.ReservationRequestDto;
+import SLC.SLC.DataStore.Dto.CheckIn.ReservedResponseDto;
 import SLC.SLC.DataStore.Interface.Locker;
 import SLC.SLC.DataStore.Interface.LockerSize;
 import SLC.SLC.DataStore.SerializableDto;
@@ -255,7 +256,10 @@ public class SLC extends AppThread {
                 if (locker.getReserved() || locker.getContainPackage()) continue;
                 if (locker.getSize() == msgDetail.lockerSize) {
                     locker.setReserved(true);
-                    String dtoStr = locker.toDto().toBase64();
+                    ReservedResponseDto res = new ReservedResponseDto();
+                    res.hasLocker = true;
+                    res.reservedLocker = locker.toDto();
+                    String dtoStr = res.toBase64();
                     getServerMBox().send(GenerateMsg(Msg.Type.SVR_ReservedResponse, dtoStr));
                     return;
                 }
@@ -278,6 +282,7 @@ public class SLC extends AppThread {
     // EndService
     public void EndService() {
         this.currentService = null;
+        this.setService(UserService.SelectScreen);
     } // EndService
 
     //------------------------------------------------------------

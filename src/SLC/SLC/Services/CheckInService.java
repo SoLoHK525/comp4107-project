@@ -62,7 +62,7 @@ public class CheckInService extends Service {
                     break;
                 case LK_Locked:
                     PerformCheckIn();
-
+                    slc.EndService();
             }
         } catch (Exception e) {
             System.out.println(e);
