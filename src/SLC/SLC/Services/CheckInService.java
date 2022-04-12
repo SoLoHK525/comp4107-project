@@ -9,24 +9,34 @@ import SLC.SLC.DataStore.Dto.CheckIn.VerifiedResponseDto;
 import SLC.SLC.DataStore.Interface.Locker;
 import SLC.SLC.DataStore.SerializableDto;
 import SLC.SLC.SLC;
-import com.sun.org.apache.xpath.internal.operations.Bool;
 
 import java.io.IOException;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Random;
+
 import SLC.SLC.Screen;
 import javafx.application.Platform;
 
 public class CheckInService extends Service {
+    //CONFIG PARAMS
+    int maxRecallAllowed = 3;
+
     //STATE
     String curBarcode;
     String slotID;
+    int HWRecallTimerID;
+    RecallingHW curRecallingHW;
+    int recalledCount;
 
     //REF
     MBox serverMBox;
+
     public CheckInService(SLC instance) {
         super(instance);
         curBarcode = "";
+        HWRecallTimerID = -1;
+        recalledCount = 0;
 
         slc.getLogger().info("Starting Check in service");
 
@@ -49,18 +59,32 @@ public class CheckInService extends Service {
     public void onMessage(Msg message) {
         try {
             switch (message.getType()) {
+                case TimesUp:
+                    if (Timer.getTimesUpMsgTimerId(message) == HWRecallTimerID) {
+                        Recall();
+                    }
+                    break;
                 case Error:
                 case BR_ReturnStandby:
                     slc.EndService();
+                    break;
+                case BR_ReturnActive:
+                    if (!curBarcode.equals("")) {
+                        if (recalledCount == 0) {
+                            WaitForRecall(slc.getBarcodeReaderMBox(), slc.GenerateMsg(Msg.Type.BR_GoStandby, ""));
+                        } else if (recalledCount >= maxRecallAllowed) {
+                            slc.EndService();
+                        }
+                    }
                     break;
                 case BR_BarcodeRead:
                     SendBarcodeToServer(message);
                     break;
                 case SVR_BarcodeVerified:
                     VerifiedResponseDto res = SerializableDto.from(message.getDetails());
-                    if(!res.verified) {
+                    if (!res.verified) {
                         slc.EndService();
-                    } else{
+                    } else {
                         slotID = res.slotID;
                         slc.getLockerMBox().send(slc.GenerateMsg(Msg.Type.LK_Unlock, slotID));
                     }
@@ -68,7 +92,6 @@ public class CheckInService extends Service {
                 case LK_Locked:
                     PerformCheckIn();
                     slc.getBarcodeReaderMBox().send(slc.GenerateMsg(Msg.Type.BR_GoStandby, ""));
-                    slc.EndService();
             }
         } catch (Exception e) {
             System.out.println(e);
@@ -82,7 +105,7 @@ public class CheckInService extends Service {
         dto.barcode = curBarcode;
         dto.timestamp = (int) new Date().getTime();
         for (Locker locker : slc.getLockers()) {
-            if(locker.getSlotId() == slotID) {
+            if (locker.getSlotId() == slotID) {
                 slc.setCheckInPackage(dto.access_code, locker);
                 break;
             }
@@ -100,5 +123,26 @@ public class CheckInService extends Service {
         curBarcode = msg.getDetails();
         dto.barcode = curBarcode;
         slc.getServerMBox().send(slc.GenerateMsg(Msg.Type.SVR_VerifyBarcode, dto.toBase64()));
+    }
+
+    private void WaitForRecall(MBox mBox, Msg msg) {
+        curRecallingHW = new RecallingHW(mBox, msg);
+        HWRecallTimerID = Timer.setTimer("hw-recaller", slc.getMBox(), 3000);
+    }
+
+    private void Recall() {
+        curRecallingHW.mBox.send(curRecallingHW.msg);
+        recalledCount++;
+        WaitForRecall(curRecallingHW.mBox, curRecallingHW.msg);
+    }
+
+    private class RecallingHW {
+        public MBox mBox;
+        public Msg msg;
+
+        public RecallingHW(MBox mBox, Msg msg) {
+            this.mBox = mBox;
+            this.msg = msg;
+        }
     }
 }
