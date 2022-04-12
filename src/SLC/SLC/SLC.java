@@ -145,7 +145,7 @@ public class SLC extends AppThread {
     //------------------------------------------------------------
     // run
     public void run() {
-        Timer.setTimer(id, mbox, pollingTime);
+        int pollingTimerID = Timer.setTimer(id, mbox, pollingTime);
         log.info(id + ": starting...");
 
         barcodeReaderMBox = appKickstarter.getThread("BarcodeReaderDriver").getMBox();
@@ -180,16 +180,23 @@ public class SLC extends AppThread {
 
 
                 case TimesUp:
-                    Timer.setTimer(id, mbox, pollingTime);
-                    log.info("Poll: " + msg.getDetails());
-                    barcodeReaderMBox.send(new Msg(id, mbox, Msg.Type.Poll, ""));
-                    touchDisplayMBox.send(new Msg(id, mbox, Msg.Type.Poll, ""));
-                    octopusCardReaderMBox.send(new Msg(id, mbox, Msg.Type.Poll, ""));
-                    lockerMBox.send(new Msg(id, mbox, Msg.Type.Poll, ""));
+                    if (Timer.getTimesUpMsgTimerId(msg) == pollingTimerID) {
+                        pollingTimerID = Timer.setTimer(id, mbox, pollingTime);
+                        log.info("Poll: " + msg.getDetails());
+                        if (!diagnosticService.isBRShutDown())
+                            barcodeReaderMBox.send(new Msg(id, mbox, Msg.Type.Poll, ""));
+                        if (!diagnosticService.isTSShutDown())
+                            touchDisplayMBox.send(new Msg(id, mbox, Msg.Type.Poll, ""));
+                        if (!diagnosticService.isORRShutDown())
+                            octopusCardReaderMBox.send(new Msg(id, mbox, Msg.Type.Poll, ""));
+                        if (!diagnosticService.isLKShutDown())
+                            lockerMBox.send(new Msg(id, mbox, Msg.Type.Poll, ""));
+                        diagnosticService.lastUpdate = (int) (System.currentTimeMillis() / 1000L);
+                    }
                     break;
 
                 case PollAck:
-                    log.info("PollAck: " + msg.getDetails());
+                case PollNak:
                     break;
 
                 case OCR_CardRead:
@@ -254,7 +261,7 @@ public class SLC extends AppThread {
                     if(this.currentService != null) {
                         this.currentService.onMessage(msg);
                     }
-                    diagnosticService.onMessage(msg);
+                    diagnosticService.sendHealthPoll();
                     break;
                 default:
                     log.warning(id + ": unknown message type: [" + msg + "]");

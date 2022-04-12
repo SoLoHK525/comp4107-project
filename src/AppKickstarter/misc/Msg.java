@@ -226,7 +226,9 @@ public class Msg {
          * Health poll response [SLC]
          */
         SVR_HealthPollResponse,
-
-
+        /**
+         * Hardware offline [SLC]
+         */
+        SVR_HWOffLine,
     } // Type
 } // Msg
