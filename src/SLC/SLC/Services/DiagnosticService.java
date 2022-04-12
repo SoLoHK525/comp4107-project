@@ -37,8 +37,8 @@ public class DiagnosticService extends Service {
             int val = entry.getValue();
             if (val == 3) {
                 String module = entry.getKey();
-                System.out.println(module + "is down! Sent Message to SLC Server.");
-                //serverMBox.send(new Msg(slc.getID(), slc.getMBox(), Msg.Type.SVR_HWOffLine, ""));
+                System.out.println(module + " is down! Sent Message to SLC Server.");
+                sendHealthPoll();
                 HWFailure.put(module, HWFailure.get(module) + 1); //val = 4 -> Msg sent to Server
             }
         }
@@ -110,19 +110,35 @@ public class DiagnosticService extends Service {
     }
 
     public boolean isBRShutDown(){
-        return HWFailure.get(modules[0]) > 3;
+        if (HWFailure.get(modules[0]) > 3) {
+            slc.getLogger().info("Error: Already Shut down Barcode Reader: Hardware Failure.");
+            return true;
+        }
+        return false;
     }
 
     public boolean isTSShutDown(){
-        return HWFailure.get(modules[1]) > 3;
+        if (HWFailure.get(modules[1]) > 3) {
+            slc.getLogger().info("Error: Already Shut down Touch Screen: Hardware Failure.");
+            return true;
+        }
+        return false;
     }
 
     public boolean isORRShutDown(){
-        return HWFailure.get(modules[2]) > 3;
+        if (HWFailure.get(modules[2]) > 3) {
+            slc.getLogger().info("Error: Already Shut down Octopus Card Reader: Hardware Failure.");
+            return true;
+        }
+        return false;
     }
 
     public boolean isLKShutDown(){
-        return HWFailure.get(modules[3]) > 3;
+        if (HWFailure.get(modules[3]) > 3) {
+            slc.getLogger().info("Error: Already Shut down Locker: Hardware Failure.");
+            return true;
+        }
+        return false;
     }
 
     /**
