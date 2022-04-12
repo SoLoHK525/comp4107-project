@@ -7,5 +7,6 @@ import SLC.SLC.DataStore.SerializableDto;
  * Server request to reserve a locker
  */
 public class ReservationRequestDto extends SerializableDto {
+    public String barcode;
     public LockerSize lockerSize;
 }
