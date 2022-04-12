@@ -40,8 +40,6 @@ public class SLC extends AppThread {
     private Service currentService;
     private HashMap<String, Locker> checkInPackage;
 
-    private int slcTimerID;
-
     private String accessCode;
     private int pickUpTime;
     private double amount = 0;
