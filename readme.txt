@@ -5,6 +5,13 @@ Github Repository URL: https://github.com/SoLoHK525/comp4107-project
 Entrypoint: SLCEmulatorStarter.java
 
 
+=========== Notice
+We used a very crappy way to store the state of SLC and Server (Locker State, Transactions)
+States might be unstable and if things gone wrong, please delete the SLCState.bin and ServerState.bin 
+inside the project root directory or the Current Working Directory
+
+
+
 =========== How to build 
 
 (1) JAR as build Target:
