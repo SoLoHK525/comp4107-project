@@ -2,6 +2,7 @@ package SLC.SLC.Services;
 
 import AppKickstarter.misc.MBox;
 import AppKickstarter.misc.Msg;
+import AppKickstarter.timer.Timer;
 import SLC.SLC.DataStore.Dto.CheckIn.BarcodeVerificationDto;
 import SLC.SLC.DataStore.Dto.CheckIn.CheckInDto;
 import SLC.SLC.DataStore.Dto.CheckIn.VerifiedResponseDto;
@@ -25,12 +26,14 @@ public class CheckInService extends Service {
     MBox serverMBox;
     public CheckInService(SLC instance) {
         super(instance);
+        curBarcode = "";
+
         slc.getLogger().info("Starting Check in service");
 
         slc.setScreen(Screen.Text);
 
         System.out.println("Running check in service");
-
+        Timer.setTimer("check-in", slc.getMBox(), 1000);
         Platform.runLater(() -> {
             slc.setScreenText("title", "Welcome!");
             slc.setScreenText("subtitle", "XXX Smart Locker");
@@ -46,6 +49,7 @@ public class CheckInService extends Service {
         try {
             switch (message.getType()) {
                 case Error:
+                case BR_ReturnStandby:
                     slc.EndService();
                     break;
                 case BR_BarcodeRead:
@@ -62,6 +66,7 @@ public class CheckInService extends Service {
                     break;
                 case LK_Locked:
                     PerformCheckIn();
+                    slc.getBarcodeReaderMBox().send(slc.GenerateMsg(Msg.Type.BR_GoStandby, ""));
                     slc.EndService();
             }
         } catch (Exception e) {

@@ -39,6 +39,8 @@ public class SLC extends AppThread {
     private Service currentService;
     private HashMap<String, Locker> checkInPackage;
 
+    private int slcTimerID;
+
     private String accessCode;
     private int pickUpTime;
     private double amount = 0;
@@ -145,7 +147,7 @@ public class SLC extends AppThread {
     //------------------------------------------------------------
     // run
     public void run() {
-        Timer.setTimer(id, mbox, pollingTime);
+        slcTimerID = Timer.setTimer(id, mbox, pollingTime);
         log.info(id + ": starting...");
 
         barcodeReaderMBox = appKickstarter.getThread("BarcodeReaderDriver").getMBox();
@@ -180,12 +182,14 @@ public class SLC extends AppThread {
 
 
                 case TimesUp:
-                    Timer.setTimer(id, mbox, pollingTime);
-                    log.info("Poll: " + msg.getDetails());
-                    barcodeReaderMBox.send(new Msg(id, mbox, Msg.Type.Poll, ""));
-                    touchDisplayMBox.send(new Msg(id, mbox, Msg.Type.Poll, ""));
-                    octopusCardReaderMBox.send(new Msg(id, mbox, Msg.Type.Poll, ""));
-                    lockerMBox.send(new Msg(id, mbox, Msg.Type.Poll, ""));
+                    if(Timer.getTimesUpMsgTimerId(msg) == slcTimerID) {
+                        slcTimerID = Timer.setTimer(id, mbox, pollingTime);
+                        log.info("Poll: " + msg.getDetails());
+                        barcodeReaderMBox.send(new Msg(id, mbox, Msg.Type.Poll, ""));
+                        touchDisplayMBox.send(new Msg(id, mbox, Msg.Type.Poll, ""));
+                        octopusCardReaderMBox.send(new Msg(id, mbox, Msg.Type.Poll, ""));
+                        lockerMBox.send(new Msg(id, mbox, Msg.Type.Poll, ""));
+                    }
                     break;
 
                 case PollAck:
@@ -211,22 +215,9 @@ public class SLC extends AppThread {
                     quit = true;
                     break;
 
-                case BR_GoActive:
-                    if (msg.getSender().equals("BarcodeReaderDriver")) {
-                        log.info("Activation Response: " + msg.getDetails());
-                        break;
-                    }
-                    log.info("Activate: " + msg.getDetails());
-                    barcodeReaderMBox.send(new Msg(id, mbox, Msg.Type.BR_GoActive, ""));
-                    break;
-
-                case BR_GoStandby:
-                    if (msg.getSender().equals("BarcodeReaderDriver")) {
-                        log.info("Standby Response: " + msg.getDetails());
-                        break;
-                    }
-                    log.info("Standby: " + msg.getDetails());
-                    barcodeReaderMBox.send(new Msg(id, mbox, Msg.Type.BR_GoStandby, ""));
+                case BR_ReturnActive:
+                case BR_ReturnStandby:
+                    currentService.onMessage(msg);
                     break;
 
                 case SVR_ReserveRequest:

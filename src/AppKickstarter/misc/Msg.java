@@ -159,6 +159,14 @@ public class Msg {
          */
         BR_GoStandby,
         /**
+         *  Barcode Reader return active
+         */
+        BR_ReturnActive,
+        /**
+         *  Barcode Reader return standby
+         */
+        BR_ReturnStandby,
+        /**
          * Card inserted
          */
         BR_BarcodeRead,
