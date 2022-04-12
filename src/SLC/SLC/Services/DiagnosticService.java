@@ -2,10 +2,14 @@ package SLC.SLC.Services;
 
 import AppKickstarter.misc.Msg;
 import SLC.SLC.DataStore.Dto.Diagnostic.HealthPoolDto;
+import SLC.SLC.DataStore.Interface.Locker;
 import SLC.SLC.SLC;
 
 import java.io.File;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -148,9 +152,36 @@ public class DiagnosticService extends Service {
         try {
             healthPoolDto.lastUpdate = this.lastUpdate;
             String healthPoll = healthPoolDto.toBase64();
+            healthPoolDto.lockers = slc.getLockers();
             //serverMBox.send(new Msg(slc.getID(), slc.getMBox(), Msg.Type.SVR_HealthPollResponse, healthPoll));
         }catch(IOException e){
             System.out.println(e); //Exception Handling
         }
+    }
+
+    public void showSystemStatus(){
+        ArrayList<Locker> lockers = slc.getLockers();
+        Date date = new Date(System.currentTimeMillis());
+        SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy.MM.dd G 'at' HH:mm:ss z");
+        String formatted = dateFormatter.format(date);
+        System.out.println("------------------------System Diagnostic Report------------------------");
+        System.out.print("Report Generation Time: " + formatted + "\n");
+        System.out.print("Hardware Encountered Failure?\n" +
+                         "  --Barcode Reader:       " + isBRShutDown() + "\n" +
+                         "  --Touch Screen Display: " + isTSShutDown() + "\n" +
+                         "  --Octopus Card Reader:  " + isORRShutDown() + "\n" +
+                         "  --Locker:               " + isLKShutDown() + "\n");
+        System.out.println("Locker Slot: {");
+
+        for (Locker lockerSlot : lockers){
+            System.out.println("[ID:" + lockerSlot.getSlotId() + ",");
+            System.out.println("    Locked:" + lockerSlot.getLocked() + ",");
+            System.out.println("    Contain Package:" + lockerSlot.getContainPackage() + ",");
+            System.out.println("    Reserved:" + lockerSlot.getReserved() + ",");
+            System.out.println("    Last Updated:" + lockerSlot.getLastUpdate() + ",");
+            System.out.println("    Access Code:" + "]"); //TODO: Access Code of the locker
+        }
+        System.out.println("}");
+        System.out.println("------------------------------End of Report-----------------------------");
     }
 }
