@@ -8,25 +8,40 @@
 <?import javafx.scene.layout.ColumnConstraints?>
 <?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.shape.Line?>
 <?import javafx.scene.shape.Rectangle?>
 <?import javafx.scene.text.Font?>
 <?import javafx.scene.text.Text?>
 
-<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="520.0" prefWidth="680.0" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="SLC.TouchDisplayHandler.Emulator.ScreenController.TextController">
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="520.0" prefWidth="680.0" xmlns="http://javafx.com/javafx/18" xmlns:fx="http://javafx.com/fxml/1" fx:controller="SLC.TouchDisplayHandler.Emulator.ScreenController.TextController">
     <children>
         <AnchorPane prefHeight="480.0" prefWidth="640.0" AnchorPane.leftAnchor="20" AnchorPane.topAnchor="20">
             <children>
-                <Text id="Title" fx:id="title" layoutX="37.0" layoutY="45.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Title" textAlignment="CENTER" textOrigin="CENTER">
-               <font>
-                  <Font size="24.0" />
-               </font></Text>
-                <Text id="subtitle" fx:id="subtitle" layoutX="39.0" layoutY="67.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Subtitle" textAlignment="CENTER" textOrigin="CENTER">
-               <font>
-                  <Font size="16.0" />
-               </font></Text>
                 <Rectangle arcHeight="5.0" arcWidth="5.0" fill="TRANSPARENT" height="480.0" onMouseClicked="#td_mouseClick" stroke="BLACK" strokeType="OUTSIDE" visible="false" width="640" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="0.0" />
-            <Text id="body" fx:id="body" layoutX="38.0" layoutY="99.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Body" textAlignment="CENTER" textOrigin="CENTER" />
+            <StackPane layoutX="221.0" layoutY="42.0" prefHeight="50.0" prefWidth="200.0">
+               <children>
+                      <Text id="Title" fx:id="title" strokeType="OUTSIDE" strokeWidth="0.0" text="Title" textAlignment="CENTER" textOrigin="CENTER">
+                     <font>
+                        <Font size="24.0" />
+                     </font>
+                  </Text>
+               </children>
+            </StackPane>
+            <StackPane layoutX="125.0" layoutY="99.0" prefHeight="32.0" prefWidth="392.0">
+               <children>
+                      <Text id="subtitle" fx:id="subtitle" strokeType="OUTSIDE" strokeWidth="0.0" text="Subtitle" textAlignment="CENTER" textOrigin="CENTER">
+                     <font>
+                        <Font size="16.0" />
+                     </font>
+                  </Text>
+               </children>
+            </StackPane>
+            <StackPane layoutX="44.0" layoutY="193.0" prefHeight="97.0" prefWidth="555.0">
+               <children>
+                  <Text id="body" fx:id="body" strokeType="OUTSIDE" strokeWidth="0.0" text="Body" textAlignment="CENTER" textOrigin="CENTER" />
+               </children>
+            </StackPane>
             </children>
         </AnchorPane>
         <Rectangle arcHeight="5.0" arcWidth="5.0" fill="#d7d7d7" height="50.0" stroke="TRANSPARENT" strokeType="INSIDE" width="680.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" />

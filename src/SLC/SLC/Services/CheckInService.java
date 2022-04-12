@@ -100,6 +100,7 @@ public class CheckInService extends Service {
                     } else {
                         slotID = res.slotID;
                         slc.getLockerMBox().send(slc.GenerateMsg(Msg.Type.LK_Unlock, slotID));
+                        this.displayTakePackageMessage(slotID);
                     }
                     break;
                 case LK_Locked:
@@ -168,6 +169,16 @@ public class CheckInService extends Service {
             slc.setScreenText("title", "Yikes!");
             slc.setScreenText("subtitle", subtitle);
             slc.setScreenText("body", msgContent);
+        });
+    }
+    
+    private void displayTakePackageMessage(String slotID) {
+        slc.setScreen(Screen.Text);
+
+        slc.setOnScreenLoaded(() -> {
+            slc.setScreenText("title", "Place the package");
+            slc.setScreenText("subtitle", "You may put the package inside the [" + slotID + "] locker now.");
+            slc.setScreenText("body", "Remember to close the locker after putting the package!");
         });
     }
 

@@ -18,6 +18,19 @@ public class Locker {
         this.reserved = false;
     }
 
+    private Locker(String slotId, LockerSize size, boolean locked, boolean containPackage, boolean reserved, int lastUpdate) {
+        this.slotId = slotId;
+        this.size = size;
+        this.locked = locked;
+        this.containPackage = containPackage;
+        this.reserved = reserved;
+        this.lastUpdate = lastUpdate;
+    }
+
+    public static Locker fromDto(LockerDto dto) {
+        return new Locker(dto.slotId, dto.size, dto.locked, dto.containPackage, dto.reserved, dto.lastUpdate);
+    }
+
     public String getSlotId() {
         return slotId;
     }
