@@ -44,7 +44,8 @@ public class CheckInService extends Service {
 
         System.out.println("Running check in service");
         Timer.setTimer("check-in", slc.getMBox(), 1000);
-        Platform.runLater(() -> {
+
+        slc.setOnScreenLoaded(() -> {
             slc.setScreenText("title", "Welcome!");
             slc.setScreenText("subtitle", "XXX Smart Locker");
             slc.setScreenText("body", "Scan a barcode to checkin your delivery ticket.");

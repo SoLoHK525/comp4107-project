@@ -42,7 +42,7 @@ public class CheckOutService extends Service {
          * it has to queue after the scene to make sure the
          * scene is drawn before editing the text
          */
-        Platform.runLater(() -> {
+        slc.setOnScreenLoaded(() -> {
             slc.setScreenText("title", "Please enter the access code.");
         });
     }

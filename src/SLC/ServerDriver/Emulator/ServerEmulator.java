@@ -68,7 +68,7 @@ public class ServerEmulator extends ServerDriver {
 
             for (int i = 0; i < 8; i++) {
                 barcode.append((char) ('0' + random.nextInt(10)));
-                if (i == 4) barcode.append('-');
+                if (i == 3) barcode.append('-');
             }
 
             ReservationRequestDto dto = new ReservationRequestDto();
@@ -158,7 +158,7 @@ public class ServerEmulator extends ServerDriver {
     @Override
     protected void handlePoll() {
         // TODO: fucking make a controller for this shit
-        switch ("ACK") {
+        switch (serverEmulatorController.pollRespCBox.toString()) {
             case "ACK":
                 slc.send(new Msg(id, mbox, Msg.Type.PollAck, id + " is up!"));
                 break;

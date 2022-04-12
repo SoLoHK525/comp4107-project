@@ -147,6 +147,10 @@ public class Msg {
          */
         TD_MouseClicked,
         /**
+         * Screen Loaded
+         */
+        TD_ScreenLoaded,
+        /**
          * Change Text Label
          */
         TD_ChangeTextLabel,

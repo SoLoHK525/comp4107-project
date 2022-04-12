@@ -50,6 +50,7 @@ public class SLC extends AppThread {
     private Screen screen;
     MouseClickHandler mouseClickHandler;
 
+    private Runnable onScreenLoaded;
 
     //------------------------------------------------------------
     // SLC
@@ -57,6 +58,10 @@ public class SLC extends AppThread {
         super(id, appKickstarter);
         pollingTime = Integer.parseInt(appKickstarter.getProperty("SLC.PollingTime"));
     } // SLC
+
+    public void setOnScreenLoaded(Runnable e) {
+        this.onScreenLoaded = e;
+    }
 
     public void setScreen(Screen screen) {
         this.screen = screen;
@@ -103,6 +108,8 @@ public class SLC extends AppThread {
             default:
                 throw new IllegalStateException("Unexpected value: " + service);
         }
+
+        this.log.info(id + ": switching to service: " + service.name());
 
         this.currentService = newService;
 
@@ -178,6 +185,9 @@ public class SLC extends AppThread {
                     processMouseClicked(msg);
                     break;
 
+                case TD_ScreenLoaded:
+                    handleScreenLoaded();
+                    break;
                 case LK_ReturnStatus:
                     log.info("LK_Status: " + msg.getDetails());
                     break;
@@ -264,6 +274,13 @@ public class SLC extends AppThread {
         appKickstarter.unregThread(this);
         log.info(id + ": terminating...");
     } // run
+
+    private void handleScreenLoaded() {
+        if(this.onScreenLoaded != null) {
+            this.onScreenLoaded.run();
+            this.onScreenLoaded = null;
+        }
+    }
 
     //------------------------------------------------------------
     // initLockers

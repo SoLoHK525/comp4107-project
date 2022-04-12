@@ -72,6 +72,7 @@ public class TouchDisplayEmulator extends TouchDisplayHandler {
                     touchDisplayEmulatorController = (TouchDisplayEmulatorController) loader.getController();
                     touchDisplayEmulatorController.initialize(id, slcStarter, log, touchDisplayEmulator, pollResp);
                     myStage.setScene(new Scene(root, WIDTH, HEIGHT));
+                    slc.send(new Msg(id, mbox, Msg.Type.TD_ScreenLoaded, ""));
                 } catch (Exception e) {
                     log.severe(id + ": failed to load " + fxmlFName);
                     e.printStackTrace();
